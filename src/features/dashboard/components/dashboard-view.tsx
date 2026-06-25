@@ -1,0 +1,127 @@
+"use client";
+
+import Link from "next/link";
+
+import { WalletStatus } from "@/components/wallet/wallet-controls";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { DashboardSection } from "@/features/dashboard/components/dashboard-section";
+import { RecentActivity } from "@/features/dashboard/components/recent-activity";
+import { useDashboardTasks } from "@/features/dashboard/hooks/use-dashboard-tasks";
+import { useRecentActivity } from "@/features/dashboard/hooks/use-recent-activity";
+import { useWallet } from "@/hooks/use-wallet";
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border-border rounded-lg border px-4 py-3">
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="text-foreground text-2xl font-semibold tabular-nums">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+export function DashboardView() {
+  const { isConnected, isReady } = useWallet();
+  const {
+    myTasks,
+    openTasks,
+    completedTasks,
+    pendingReviews,
+    counts,
+    isLoading,
+  } = useDashboardTasks();
+  const { data: activity = [], isLoading: isActivityLoading } =
+    useRecentActivity();
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-foreground text-2xl font-semibold tracking-tight">
+          Dashboard
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Tasks and activity update automatically via event subscriptions.
+        </p>
+      </div>
+
+      <Card className="border-border ring-0">
+        <CardHeader className="border-border border-b py-4">
+          <CardTitle className="text-base">Wallet</CardTitle>
+          <CardDescription>Freighter connection</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {isReady ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <WalletStatus className="items-start!" />
+              {!isConnected ? (
+                <Button size="sm" render={<Link href="/create" />}>
+                  Connect wallet
+                </Button>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">Loading wallet…</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label="My tasks" value={counts.myTasks} />
+        <StatCard label="Open" value={counts.openTasks} />
+        <StatCard label="Completed" value={counts.completedTasks} />
+        <StatCard label="Pending review" value={counts.pendingReviews} />
+      </div>
+
+      <RecentActivity entries={activity} isLoading={isActivityLoading} />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DashboardSection
+          title="My tasks"
+          description="Tasks you created"
+          tasks={myTasks}
+          isLoading={isLoading}
+          emptyTitle="No tasks created"
+          emptyDescription="Fund a task to see it here."
+          actionHref="/create"
+          actionLabel="Create task"
+        />
+        <DashboardSection
+          title="Open tasks"
+          description="Available for proof submission"
+          tasks={openTasks}
+          isLoading={isLoading}
+          emptyTitle="No open tasks"
+          emptyDescription="Open tasks appear here when funded."
+        />
+        <DashboardSection
+          title="Pending reviews"
+          description="Submissions awaiting your decision"
+          tasks={pendingReviews}
+          isLoading={isLoading}
+          emptyTitle="No pending reviews"
+          emptyDescription={
+            isConnected
+              ? "Proof submissions you need to review appear here."
+              : "Connect your wallet to see pending reviews."
+          }
+        />
+        <DashboardSection
+          title="Completed tasks"
+          description="Approved and paid out"
+          tasks={completedTasks}
+          isLoading={isLoading}
+          emptyTitle="No completed tasks"
+          emptyDescription="Approved tasks appear here after review."
+        />
+      </div>
+    </div>
+  );
+}

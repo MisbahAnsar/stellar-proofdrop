@@ -3,9 +3,10 @@
 import { useEffect, useRef } from "react";
 
 import { getProveItContractId } from "@/config/stellar";
+import { activityFromChainEvent } from "@/lib/dashboard/activity-from-task";
 import { taskEventBus } from "@/lib/events/task-bus";
-import { fetchTaskCreatedEvents } from "@/services/stellar/events";
-import { getRpcServer } from "@/services/stellar/rpc";
+import { appendActivity } from "@/services/activity/activity-store";
+import { fetchProveItEvents } from "@/services/stellar/events";
 
 const POLL_INTERVAL_MS = 15_000;
 const LEDGER_LOOKBACK = 1_000;
@@ -27,6 +28,7 @@ export function useContractEventListener() {
 
     async function pollEvents() {
       try {
+        const { getRpcServer } = await import("@/services/stellar/rpc");
         const server = getRpcServer();
         const latestLedger = lastLedgerRef.current
           ? lastLedgerRef.current + 1
@@ -35,7 +37,7 @@ export function useContractEventListener() {
               (await server.getLatestLedger()).sequence - LEDGER_LOOKBACK,
             );
 
-        const events = await fetchTaskCreatedEvents({
+        const events = await fetchProveItEvents({
           contractId: activeContractId,
           startLedger: latestLedger,
         });
@@ -46,14 +48,27 @@ export function useContractEventListener() {
 
         let maxLedger = latestLedger;
         for (const event of events) {
-          const key = `${event.transactionHash}:${event.taskId}`;
+          const key = `${event.type}:${event.transactionHash}:${event.taskId}`;
           if (seenEventsRef.current.has(key)) {
             continue;
           }
 
           seenEventsRef.current.add(key);
           maxLedger = Math.max(maxLedger, event.ledger);
-          taskEventBus.emitChainEvent(event);
+
+          const entry = activityFromChainEvent(event);
+          appendActivity(entry);
+          taskEventBus.emitActivity(entry);
+
+          if (event.type === "task_created") {
+            taskEventBus.emitChainEvent({
+              taskId: event.taskId,
+              creator: "",
+              rewardStroops: "0",
+              transactionHash: event.transactionHash,
+              ledger: event.ledger,
+            });
+          }
         }
 
         lastLedgerRef.current = maxLedger;

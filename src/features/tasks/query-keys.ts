@@ -8,3 +8,8 @@ export const proofKeys = {
   all: ["proofs"] as const,
   detail: (taskId: string) => [...proofKeys.all, "detail", taskId] as const,
 };
+
+export const activityKeys = {
+  all: ["activity"] as const,
+  recent: () => [...activityKeys.all, "recent"] as const,
+};

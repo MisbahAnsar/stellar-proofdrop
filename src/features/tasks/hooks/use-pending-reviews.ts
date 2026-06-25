@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { filterPendingReviews } from "@/lib/dashboard/task-filters";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
 import { useWallet } from "@/hooks/use-wallet";
 
@@ -10,11 +11,7 @@ export function usePendingReviews() {
   const { data: tasks = [], isLoading } = useTasks();
 
   const pendingReviews = useMemo(
-    () =>
-      tasks.filter(
-        (task) =>
-          task.creator === address && task.status === "proof_submitted",
-      ),
+    () => filterPendingReviews(tasks, address ?? undefined),
     [tasks, address],
   );
 

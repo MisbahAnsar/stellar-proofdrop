@@ -340,3 +340,109 @@ export async function fetchTaskCreatedEvents(params: {
     })
     .filter((event): event is TaskCreatedChainEvent => event !== null);
 }
+
+type ProveItRpcEvent = {
+  type: "task_created" | "proof_submitted" | "task_approved" | "task_rejected";
+  taskId: string;
+  transactionHash: string;
+  ledger: number;
+  message: string;
+  timestamp: string;
+};
+
+export async function fetchProveItEvents(params: {
+  contractId: string;
+  startLedger: number;
+  limit?: number;
+}): Promise<ProveItRpcEvent[]> {
+  const { getRpcServer } = await import("@/services/stellar/rpc");
+  const server = getRpcServer();
+
+  const response = await server.getEvents({
+    startLedger: params.startLedger,
+    filters: [
+      {
+        type: "contract",
+        contractIds: [params.contractId],
+        topics: [TASK_CREATED_TOPICS],
+      },
+      {
+        type: "contract",
+        contractIds: [params.contractId],
+        topics: [PROOF_SUBMITTED_TOPICS],
+      },
+      {
+        type: "contract",
+        contractIds: [params.contractId],
+        topics: [TASK_APPROVED_TOPICS],
+      },
+      {
+        type: "contract",
+        contractIds: [params.contractId],
+        topics: [TASK_REJECTED_TOPICS],
+      },
+    ],
+    limit: params.limit ?? 100,
+  });
+
+  const parsed: ProveItRpcEvent[] = [];
+
+  for (const event of response.events) {
+    if (event.type !== "contract" || !event.inSuccessfulContractCall) {
+      continue;
+    }
+
+    const created = parseTaskCreatedValue(event.value);
+    if (created) {
+      parsed.push({
+        type: "task_created",
+        taskId: created.taskId,
+        transactionHash: event.txHash,
+        ledger: event.ledger,
+        message: `Task #${created.taskId} created on-chain`,
+        timestamp: new Date().toISOString(),
+      });
+      continue;
+    }
+
+    const proof = parseProofSubmittedValue(event.value);
+    if (proof) {
+      parsed.push({
+        type: "proof_submitted",
+        taskId: proof.taskId,
+        transactionHash: event.txHash,
+        ledger: event.ledger,
+        message: `Proof submitted for task #${proof.taskId}`,
+        timestamp: new Date().toISOString(),
+      });
+      continue;
+    }
+
+    const approved = parseTaskApprovedValue(event.value);
+    if (approved) {
+      parsed.push({
+        type: "task_approved",
+        taskId: approved.taskId,
+        transactionHash: event.txHash,
+        ledger: event.ledger,
+        message: `Task #${approved.taskId} approved on-chain`,
+        timestamp: new Date().toISOString(),
+      });
+      continue;
+    }
+
+    const rejected = parseTaskRejectedValue(event.value);
+    if (rejected) {
+      parsed.push({
+        type: "task_rejected",
+        taskId: rejected.taskId,
+        transactionHash: event.txHash,
+        ledger: event.ledger,
+        message: `Task #${rejected.taskId} proof rejected on-chain`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  return parsed;
+}

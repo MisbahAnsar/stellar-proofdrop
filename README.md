@@ -128,16 +128,26 @@ Creators see pending submissions and can approve or reject:
 
 ### Task list & events
 
-- Home (`/`) and Dashboard (`/dashboard`) show live task lists with links to task detail
-- `taskEventBus` broadcasts local create/update/refresh events across pages
-- Background Soroban RPC `getEvents` listener polls for `task_created` events
-- React Query invalidation keeps lists in sync after on-chain confirmation
+- Home (`/`) shows a live task list with links to task detail
+- `taskEventBus` broadcasts local create/update/refresh/activity events across pages
+- Background Soroban RPC `getEvents` listener polls contract events
+- React Query invalidation keeps dashboard and lists in sync after on-chain confirmation
 
 ### Dashboard (`/dashboard`)
 
-- Wallet status overview
-- Pending proof submissions awaiting creator review
-- Funded tasks with reward, deadline, and ledger metadata
+Responsive overview with live sections — no manual refresh:
+
+| Section | Description |
+| ------- | ----------- |
+| **My Tasks** | Tasks you created |
+| **Open Tasks** | Tasks available for proof submission |
+| **Completed Tasks** | Approved and paid out |
+| **Pending Reviews** | Submissions awaiting your decision |
+| **Recent Activity** | Live feed from local and on-chain events |
+
+- Summary stat cards for each section
+- `taskEventBus` subscriptions + Soroban RPC polling keep tasks and activity in sync
+- React Query invalidation on create, update, and activity events
 
 ## Scripts
 
@@ -220,6 +230,7 @@ Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twen
 - [x] Frontend unit tests (Vitest)
 - [x] Creator review flow (approve/reject with payment release)
 - [x] Pending submissions dashboard and automatic UI refresh
+- [x] Full dashboard with task sections and recent activity feed
 
 ## Next steps
 

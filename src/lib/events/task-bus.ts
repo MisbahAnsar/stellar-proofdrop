@@ -1,3 +1,4 @@
+import type { ActivityEntry } from "@/types/activity";
 import type { TaskCreatedChainEvent, TaskMetadata } from "@/types/task";
 
 export const TASK_EVENTS = {
@@ -5,6 +6,7 @@ export const TASK_EVENTS = {
   updated: "proveit:task-updated",
   refresh: "proveit:tasks-refresh",
   chainEvent: "proveit:chain-event",
+  activity: "proveit:activity",
 } as const;
 
 type TaskCreatedDetail = {
@@ -17,6 +19,10 @@ type TaskUpdatedDetail = {
 
 type ChainEventDetail = {
   event: TaskCreatedChainEvent;
+};
+
+type ActivityDetail = {
+  entry: ActivityEntry;
 };
 
 class TaskEventBus extends EventTarget {
@@ -49,6 +55,15 @@ class TaskEventBus extends EventTarget {
 
   emitRefresh() {
     this.dispatchEvent(new Event(TASK_EVENTS.refresh));
+  }
+
+  emitActivity(entry: ActivityEntry) {
+    this.dispatchEvent(
+      new CustomEvent<ActivityDetail>(TASK_EVENTS.activity, {
+        detail: { entry },
+      }),
+    );
+    this.emitRefresh();
   }
 
   onTaskCreated(handler: (task: TaskMetadata) => void) {
@@ -84,6 +99,16 @@ class TaskEventBus extends EventTarget {
 
     this.addEventListener(TASK_EVENTS.chainEvent, listener);
     return () => this.removeEventListener(TASK_EVENTS.chainEvent, listener);
+  }
+
+  onActivity(handler: (entry: ActivityEntry) => void) {
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<ActivityDetail>).detail;
+      handler(detail.entry);
+    };
+
+    this.addEventListener(TASK_EVENTS.activity, listener);
+    return () => this.removeEventListener(TASK_EVENTS.activity, listener);
   }
 }
 
