@@ -17,6 +17,7 @@ import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TransactionStatus } from "@/features/tasks/components/transaction-status";
+import { TransactionExplorerLink } from "@/components/stellar/transaction-explorer-link";
 import type { SubmitProofFlowState } from "@/features/tasks/hooks/use-submit-proof";
 import { canSubmitProof } from "@/lib/tasks/status";
 import { validateProofFile } from "@/lib/proof/validation";
@@ -79,21 +80,34 @@ export function SubmitProofForm({
   if (isSubmitted) {
     if (task.status === "approved") {
       return (
-        <Alert>
+        <Alert variant="success">
           <AlertTitle>Task completed</AlertTitle>
-          <AlertDescription>
-            This task was approved and payment was released to the worker.
+          <AlertDescription className="space-y-3">
+            <p>Payment was released to the worker on-chain.</p>
+            {task.reviewTransactionHash ? (
+              <TransactionExplorerLink
+                transactionHash={task.reviewTransactionHash}
+                label="Approval on Stellar Expert"
+              />
+            ) : null}
           </AlertDescription>
         </Alert>
       );
     }
 
     return (
-      <Alert>
+      <Alert variant="success">
         <AlertTitle>Proof already submitted</AlertTitle>
-        <AlertDescription>
-          This task already has an on-chain proof hash. Creators can verify it
-          below.
+        <AlertDescription className="space-y-3">
+          <p>
+            This task has an on-chain proof hash. Creators can verify it below.
+          </p>
+          {task.proofTransactionHash ? (
+            <TransactionExplorerLink
+              transactionHash={task.proofTransactionHash}
+              label="Proof submission on Stellar Expert"
+            />
+          ) : null}
         </AlertDescription>
       </Alert>
     );

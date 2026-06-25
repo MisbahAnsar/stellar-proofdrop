@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,28 +53,53 @@ type WalletButtonProps = {
 
 export function WalletButton({ className }: WalletButtonProps) {
   const {
+    address,
     isConnected,
     isConnecting,
     isReady,
     isFreighterInstalled,
+    networkLabel,
     connect,
     disconnect,
   } = useWallet();
 
   if (!isReady) {
     return (
-      <Button variant="outline" size="sm" disabled className={className}>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled
+        className={cn("rounded-full", className)}
+      >
         <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
         <span>Loading</span>
       </Button>
     );
   }
 
-  if (isConnected) {
+  if (isConnected && address) {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
-        <WalletStatus className="hidden items-end sm:flex" />
-        <Button variant="outline" size="sm" onClick={disconnect}>
+      <div
+        className={cn(
+          "border-border bg-card/90 flex max-w-full items-center gap-2 rounded-full border py-1 pr-1 pl-3 shadow-sm",
+          className,
+        )}
+      >
+        <div className="hidden min-w-0 sm:block">
+          <p className="text-foreground truncate font-mono text-xs font-medium">
+            {truncateAddress(address, 4)}
+          </p>
+          <p className="text-muted-foreground text-[10px] leading-tight">
+            {networkLabel}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="h-8 shrink-0 rounded-full px-3 text-xs"
+          onClick={disconnect}
+        >
           Disconnect
         </Button>
       </div>
@@ -83,9 +108,9 @@ export function WalletButton({ className }: WalletButtonProps) {
 
   return (
     <Button
-      variant="outline"
+      variant="default"
       size="sm"
-      className={className}
+      className={cn("rounded-full px-4", className)}
       disabled={isConnecting}
       onClick={() => void connect()}
     >
@@ -94,10 +119,11 @@ export function WalletButton({ className }: WalletButtonProps) {
           <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
           Connecting
         </>
-      ) : isFreighterInstalled ? (
-        "Connect Wallet"
       ) : (
-        "Install Freighter"
+        <>
+          <Wallet className="size-3.5" aria-hidden="true" />
+          {isFreighterInstalled ? "Connect" : "Install Freighter"}
+        </>
       )}
     </Button>
   );

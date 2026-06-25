@@ -8,6 +8,16 @@
 | **GitHub**    | https://github.com/MisbahAnsar/stellar-proofdrop         |
 | **CI**        | https://github.com/MisbahAnsar/stellar-proofdrop/actions |
 
+## Demo transactions (testnet)
+
+| Action       | Link                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| Create task  | https://stellar.expert/explorer/testnet/tx/b03dbaa8987faf96404ed49412fdfe2f085f76a8344d069d49ece253af21e2e3 |
+| Task #2 (UI) | https://proofdrop-stellar.vercel.app/tasks/2                                                                |
+| Contract     | https://stellar.expert/explorer/testnet/contract/CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC   |
+
+More detail: [`demo-transactions.md`](demo-transactions.md)
+
 ## Deployed contract (testnet)
 
 | Field             | Value                                                                                                                                |
@@ -29,43 +39,19 @@ NEXT_PUBLIC_PROOFDROP_CONTRACT_ID=CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNK
 
 > After setting env vars in Vercel, trigger a **Redeploy** so the build picks them up.
 
-## Requirements coverage
-
-| Requirement                         | Implementation                                                            |
-| ----------------------------------- | ------------------------------------------------------------------------- |
-| Advanced smart contract development | Escrow lifecycle, proof hash storage, approve/reject, 28 Rust tests       |
-| Inter-contract communication        | `token::Client` transfers to/from testnet XLM SAC (`CDLZFC3…`)            |
-| Event streaming & real-time updates | Soroban RPC polling + `taskEventBus` + React Query invalidation           |
-| CI/CD pipeline                      | GitHub Actions: lint, format, typecheck, frontend + contract tests, build |
-| Smart contract deployment workflow  | `bun run deploy:contract` → `docs/deployment.testnet.json`                |
-| Mobile responsive frontend          | Responsive navbar, grids, task lists (Tailwind breakpoints)               |
-| Error handling & loading states     | Error boundaries, skeletons, transaction status, toasts                   |
-| Contract + frontend tests           | 28 contract + 25 frontend Vitest tests                                    |
-| Production-ready architecture       | Feature folders, services layer, typed env, thin Soroban client           |
-| Documentation                       | README, contracts README, deployment record, demo steps                   |
-
 ## Submission checklist
 
-| Item                                    | Status                                                                   |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| Public GitHub repository                | ✅                                                                       |
-| README with complete documentation      | ✅                                                                       |
-| 10+ meaningful commits                  | ✅                                                                       |
-| Live demo link                          | ✅ https://proofdrop-stellar.vercel.app                                  |
-| Contract deployment address             | ✅ `CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC`            |
-| Transaction hash (contract interaction) | ✅ Initialize: `dcb8c990…` (create_task hash from your demo — see below) |
-| Screenshot: mobile responsive UI        | ⬜ **You** — capture on phone or DevTools                                |
-| Screenshot: CI/CD running               | ⬜ **You** — GitHub Actions tab                                          |
-| Screenshot: 3+ passing tests            | ⬜ **You** — `bun run test:all` terminal or CI log                       |
-| Demo video (1–2 min)                    | ⬜ **You** — record create → proof → review flow                         |
-
-## What you must do manually
-
-1. **Vercel** — Paste the env vars above → Redeploy.
-2. **Freighter** — Testnet, fund creator + worker via [friendbot](https://laboratory.stellar.org/#account-creator?network=testnet).
-3. **Demo flow** — Create task → submit proof → approve; copy the **create_task** transaction hash from the toast/UI for your submission.
-4. **Screenshots** — Save to `docs/screenshots/` (mobile home, CI green, test output).
-5. **Demo video** — 1–2 min screen recording of the full flow on https://proofdrop-stellar.vercel.app.
+| Item                                    | Status                                                                                                                           |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Public GitHub repository                | ✅                                                                                                                               |
+| README with complete documentation      | ✅                                                                                                                               |
+| 10+ meaningful commits                  | ✅                                                                                                                               |
+| Live demo link                          | ✅ https://proofdrop-stellar.vercel.app                                                                                          |
+| Contract deployment address             | ✅ `CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC`                                                                    |
+| Transaction hash (contract interaction) | ✅ [Create task tx](https://stellar.expert/explorer/testnet/tx/b03dbaa8987faf96404ed49412fdfe2f085f76a8344d069d49ece253af21e2e3) |
+| CI/CD                                   | ✅ [GitHub Actions](https://github.com/MisbahAnsar/stellar-proofdrop/actions)                                                    |
+| 3+ passing tests                        | ✅ 53 tests                                                                                                                      |
+| Demo video (1–2 min)                    | ⬜ Add link when ready                                                                                                           |
 
 ## Quick test commands
 

@@ -124,6 +124,33 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
                 <dd className="mt-2">
                   <TransactionExplorerLink
                     transactionHash={task.transactionHash}
+                    label="Create task on Stellar Expert"
+                  />
+                </dd>
+              </div>
+            ) : null}
+            {task.proofTransactionHash ? (
+              <div className="bg-muted/40 rounded-lg border p-3 sm:col-span-2">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                  Proof submission transaction
+                </dt>
+                <dd className="mt-2">
+                  <TransactionExplorerLink
+                    transactionHash={task.proofTransactionHash}
+                    label="Submit proof on Stellar Expert"
+                  />
+                </dd>
+              </div>
+            ) : null}
+            {task.reviewTransactionHash ? (
+              <div className="bg-muted/40 rounded-lg border p-3 sm:col-span-2">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                  Review transaction
+                </dt>
+                <dd className="mt-2">
+                  <TransactionExplorerLink
+                    transactionHash={task.reviewTransactionHash}
+                    label="Review on Stellar Expert"
                   />
                 </dd>
               </div>

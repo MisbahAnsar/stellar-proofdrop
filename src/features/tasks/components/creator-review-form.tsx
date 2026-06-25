@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TransactionStatus } from "@/features/tasks/components/transaction-status";
+import { TransactionExplorerLink } from "@/components/stellar/transaction-explorer-link";
 import type { ReviewFlowState } from "@/features/tasks/hooks/use-review-task";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import type { TaskMetadata } from "@/types/task";
@@ -36,10 +37,16 @@ export function CreatorReviewForm({
 }: CreatorReviewFormProps) {
   if (task.status === "approved") {
     return (
-      <Alert>
+      <Alert variant="success">
         <AlertTitle>Task approved</AlertTitle>
-        <AlertDescription>
-          Payment was released to the worker. This task is complete.
+        <AlertDescription className="space-y-3">
+          <p>Payment was released to the worker. This task is complete.</p>
+          {task.reviewTransactionHash ? (
+            <TransactionExplorerLink
+              transactionHash={task.reviewTransactionHash}
+              label="Approval on Stellar Expert"
+            />
+          ) : null}
         </AlertDescription>
       </Alert>
     );
@@ -84,6 +91,13 @@ export function CreatorReviewForm({
               ? ` · ${new Date(task.proofSubmittedAt).toLocaleString()}`
               : ""}
           </p>
+        ) : null}
+
+        {task.proofTransactionHash ? (
+          <TransactionExplorerLink
+            transactionHash={task.proofTransactionHash}
+            label="Proof submission on Stellar Expert"
+          />
         ) : null}
 
         {flowState.status === "pending" ||

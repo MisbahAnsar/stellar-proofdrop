@@ -10,19 +10,26 @@ Paid tasks with on-chain proof verification on **Stellar Soroban**.
 
 Creators fund tasks with XLM locked in a smart contract. Workers submit proof off-chain; only a **SHA-256 hash** is stored on-chain. Creators review submissions and release payment on approval.
 
-## Screenshots
+## Demo
 
-> Add images to [`docs/screenshots/`](docs/screenshots/) and uncomment the lines below.
+| Resource                      | Link                                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Live app**                  | https://proofdrop-stellar.vercel.app                                                                                          |
+| **Create task tx** (Task #2)  | [Stellar Expert](https://stellar.expert/explorer/testnet/tx/b03dbaa8987faf96404ed49412fdfe2f085f76a8344d069d49ece253af21e2e3) |
+| **Task detail** (after proof) | https://proofdrop-stellar.vercel.app/tasks/2                                                                                  |
+| **Contract**                  | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC)   |
 
-<!--
-![Home task list](docs/screenshots/home.png)
-![Create task](docs/screenshots/create-task.png)
-![Submit proof](docs/screenshots/submit-proof.png)
-![Dashboard](docs/screenshots/dashboard.png)
-![Creator review](docs/screenshots/review.png)
--->
+Every on-chain action in the app links to Stellar Expert using this URL pattern:
 
-_Placeholder — screenshots coming soon._
+```
+https://stellar.expert/explorer/testnet/tx/{transaction_hash}
+```
+
+Example create-task transaction:
+
+https://stellar.expert/explorer/testnet/tx/b03dbaa8987faf96404ed49412fdfe2f085f76a8344d069d49ece253af21e2e3
+
+See also [`docs/demo-transactions.md`](docs/demo-transactions.md) and [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
 
 ## Features
 
@@ -31,7 +38,7 @@ _Placeholder — screenshots coming soon._
 - Proof upload with client-side hashing and local preview
 - Creator approve / reject with automatic payment release
 - Live dashboard with event-driven updates (no manual refresh)
-- Accessible UI: skeletons, empty states, error boundaries
+- **Styled UI** — cards, status badges, explorer links, responsive layout
 
 ## Stack
 
@@ -351,7 +358,7 @@ GitHub Actions runs on every push/PR to `main` (lint, format check, typecheck, t
 
 ### Conventions
 
-- **Light theme only** — white background, gray borders, no gradients
+- **Light theme** — soft panels, primary accents, Stellar Expert links on every tx
 - **Feature folders** — colocate UI, hooks, and schemas under `src/features/`
 - **Services** — side effects (RPC, storage) live in `src/services/`
 - **Event bus** — `taskEventBus` for cross-page refresh without prop drilling
@@ -386,7 +393,7 @@ Task metadata and proof files are stored in `localStorage` for demo purposes. Th
 
 ## Submission
 
-See [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the full checklist, deployed contract address, transaction hashes, and items you need to capture manually (screenshots, demo video).
+See [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the full checklist, deployed contract address, demo transaction links, and demo video slot.
 
 ## License
 
