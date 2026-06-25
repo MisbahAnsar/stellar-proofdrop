@@ -6,36 +6,44 @@ Users create small paid tasks, lock XLM in a smart contract, and release payment
 
 ## Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS v4 + shadcn/ui (base-nova)
-- **Data fetching:** TanStack React Query v5
-- **Validation:** Zod
+- **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui
+- **Data:** TanStack React Query v5, Zod
+- **Contracts:** Rust, Soroban SDK 25
 - **Package manager:** Bun
 
 ## Project structure
 
 ```
+contracts/                  # Soroban smart contracts (Rust)
+└── proveit/                # Task escrow contract
+
 src/
-├── app/                  # Next.js routes and global styles
+├── app/                    # Next.js routes and global styles
 ├── components/
-│   ├── layout/           # App shell, navbar
-│   └── ui/               # shadcn/ui primitives
-├── config/               # App-wide configuration
-├── contracts/            # Soroban bindings (future)
-├── features/             # Domain feature modules (future)
-├── hooks/                # Shared React hooks
-├── lib/                  # Utilities, env validation
-├── providers/            # React context providers
-├── services/             # Stellar / Soroban clients (future)
-└── types/                # Shared TypeScript types
+│   ├── layout/             # App shell, navbar
+│   └── ui/                 # shadcn/ui primitives
+├── config/                 # App-wide configuration
+├── contracts/              # Generated TS bindings (future)
+├── features/               # Domain feature modules (future)
+├── hooks/                  # Shared React hooks
+├── lib/                    # Utilities, env validation
+├── providers/              # React context providers
+├── services/               # Stellar / Soroban clients (future)
+└── types/                  # Shared TypeScript types
 ```
+
+See [contracts/README.md](contracts/README.md) for contract architecture details.
 
 ## Getting started
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) (recommended) or Node.js 20+
+- Rust 1.84+ and `wasm32v1-none` target
+
+```bash
+rustup target add wasm32v1-none
+```
 
 ### Install
 
@@ -69,6 +77,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
+### Frontend
+
 | Command                | Description              |
 | ---------------------- | ------------------------ |
 | `bun dev`              | Start development server |
@@ -79,6 +89,29 @@ Open [http://localhost:3000](http://localhost:3000).
 | `bun run format`       | Format with Prettier     |
 | `bun run format:check` | Check formatting         |
 | `bun run typecheck`    | TypeScript type check    |
+
+### Contracts
+
+Run from the `contracts/` directory:
+
+| Command                                              | Description                |
+| ---------------------------------------------------- | -------------------------- |
+| `cargo test`                                         | Run contract unit tests    |
+| `cargo build --target wasm32v1-none --release` | Build optimized WASM    |
+
+## Soroban contract
+
+The `proveit` contract supports task creation with on-chain fund locking.
+
+| Function       | Description                                      |
+| -------------- | ------------------------------------------------ |
+| `initialize`   | Configure the reward token (XLM SAC)             |
+| `create_task`  | Lock funds, store task, emit `TaskCreated` event |
+| `get_task`     | Read task by ID                                  |
+| `get_task_count` | Total tasks created                            |
+| `get_token`    | Configured token address                         |
+
+Each task stores `creator`, `reward`, `proof_hash` (placeholder), and `status`. Twelve unit tests cover initialization, validation, fund locking, events, and error paths.
 
 ## Tooling
 
@@ -110,24 +143,19 @@ Open [http://localhost:3000](http://localhost:3000).
 - **Gray borders** (`--border`)
 - **Minimal aesthetic** — no gradients
 
-## Completed (scaffolding)
+## Completed
 
-- [x] Scalable `src/` folder architecture
-- [x] Required libraries installed
-- [x] shadcn/ui configured
-- [x] Tailwind CSS v4 configured with theme variables
-- [x] ESLint + Prettier configured
-- [x] Environment variable setup with Zod validation
-- [x] React Query provider
-- [x] Reusable app layout and responsive shell
-- [x] Navbar with mobile navigation
-- [x] Light-only minimal theme
+- [x] Frontend scaffolding (`src/` architecture, layout, theme)
+- [x] Soroban contract architecture (`contracts/proveit`)
+- [x] Task creation with fund locking and events
+- [x] Contract unit tests (12 passing)
 
 ## Next steps
 
-- Soroban smart contract
 - Wallet connection (Freighter / compatible wallets)
-- Task creation, proof submission, and approval flows
+- Proof submission and approval handlers
+- Payment release on approval
+- TypeScript contract bindings and frontend integration
 - Off-chain proof storage integration
 
 ## License
