@@ -213,8 +213,7 @@ function parseContractEvents<TBase>(
   transactionHash: string,
   ledger: number,
 ): Array<TBase & { transactionHash: string; ledger: number }> {
-  const parsed: Array<TBase & { transactionHash: string; ledger: number }> =
-    [];
+  const parsed: Array<TBase & { transactionHash: string; ledger: number }> = [];
 
   for (const event of events) {
     if (event.type().name !== "contract") {
@@ -302,14 +301,70 @@ export function parseTaskRejectedEvents(
   );
 }
 
-type ProveItRpcEvent = {
+export type ProveItRpcEvent = {
   type: "task_created" | "proof_submitted" | "task_approved" | "task_rejected";
   taskId: string;
   transactionHash: string;
   ledger: number;
   message: string;
   timestamp: string;
+  creator?: string;
+  worker?: string;
+  rewardStroops?: string;
+  proofHashHex?: string;
 };
+
+/** Classify RPC event data. Order matters — specific parsers before generic ones. */
+export function classifyProveItEventValue(
+  value: xdr.ScVal,
+): Omit<ProveItRpcEvent, "transactionHash" | "ledger" | "timestamp"> | null {
+  const proof = parseProofSubmittedValue(value);
+  if (proof) {
+    return {
+      type: "proof_submitted",
+      taskId: proof.taskId,
+      message: `Proof submitted for task #${proof.taskId}`,
+      worker: proof.worker,
+      proofHashHex: proof.proofHashHex,
+    };
+  }
+
+  const approved = parseTaskApprovedValue(value);
+  if (approved) {
+    return {
+      type: "task_approved",
+      taskId: approved.taskId,
+      message: `Task #${approved.taskId} approved on-chain`,
+      creator: approved.creator,
+      worker: approved.worker,
+      rewardStroops: approved.rewardStroops,
+    };
+  }
+
+  const rejected = parseTaskRejectedValue(value);
+  if (rejected) {
+    return {
+      type: "task_rejected",
+      taskId: rejected.taskId,
+      message: `Task #${rejected.taskId} proof rejected on-chain`,
+      creator: rejected.creator,
+      worker: rejected.worker,
+    };
+  }
+
+  const created = parseTaskCreatedValue(value);
+  if (created) {
+    return {
+      type: "task_created",
+      taskId: created.taskId,
+      message: `Task #${created.taskId} created on-chain`,
+      creator: created.creator,
+      rewardStroops: created.rewardStroops,
+    };
+  }
+
+  return null;
+}
 
 export async function fetchProveItEvents(params: {
   contractId: string;
@@ -343,7 +398,7 @@ export async function fetchProveItEvents(params: {
         topics: [TASK_REJECTED_TOPICS],
       },
     ],
-    limit: params.limit ?? 100,
+    limit: params.limit ?? 200,
   });
 
   const parsed: ProveItRpcEvent[] = [];
@@ -353,56 +408,17 @@ export async function fetchProveItEvents(params: {
       continue;
     }
 
-    const created = parseTaskCreatedValue(event.value);
-    if (created) {
-      parsed.push({
-        type: "task_created",
-        taskId: created.taskId,
-        transactionHash: event.txHash,
-        ledger: event.ledger,
-        message: `Task #${created.taskId} created on-chain`,
-        timestamp: new Date().toISOString(),
-      });
+    const classified = classifyProveItEventValue(event.value);
+    if (!classified) {
       continue;
     }
 
-    const proof = parseProofSubmittedValue(event.value);
-    if (proof) {
-      parsed.push({
-        type: "proof_submitted",
-        taskId: proof.taskId,
-        transactionHash: event.txHash,
-        ledger: event.ledger,
-        message: `Proof submitted for task #${proof.taskId}`,
-        timestamp: new Date().toISOString(),
-      });
-      continue;
-    }
-
-    const approved = parseTaskApprovedValue(event.value);
-    if (approved) {
-      parsed.push({
-        type: "task_approved",
-        taskId: approved.taskId,
-        transactionHash: event.txHash,
-        ledger: event.ledger,
-        message: `Task #${approved.taskId} approved on-chain`,
-        timestamp: new Date().toISOString(),
-      });
-      continue;
-    }
-
-    const rejected = parseTaskRejectedValue(event.value);
-    if (rejected) {
-      parsed.push({
-        type: "task_rejected",
-        taskId: rejected.taskId,
-        transactionHash: event.txHash,
-        ledger: event.ledger,
-        message: `Task #${rejected.taskId} proof rejected on-chain`,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    parsed.push({
+      ...classified,
+      transactionHash: event.txHash,
+      ledger: event.ledger,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return parsed;

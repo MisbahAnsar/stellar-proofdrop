@@ -30,7 +30,11 @@ export function TransactionStatus({
 
   if (flowState.status === "pending") {
     return (
-      <Alert className={cn("border-border", className)}>
+      <Alert
+        className={cn("border-border", className)}
+        role="status"
+        aria-live="polite"
+      >
         <Loader2 className="size-4 animate-spin" />
         <AlertTitle>Transaction pending</AlertTitle>
         <AlertDescription>

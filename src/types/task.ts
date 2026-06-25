@@ -1,4 +1,4 @@
-export type TaskStatus = "open" | "proof_submitted" | "approved" | "rejected";
+export type TaskStatus = "open" | "proof_submitted" | "approved";
 
 export type TaskMetadata = {
   taskId: string;

@@ -11,12 +11,17 @@ type ProofPreviewProps = {
 export function ProofPreview({ proof, className }: ProofPreviewProps) {
   if (proof.mimeType.startsWith("image/")) {
     return (
-      <div className={cn("border-border overflow-hidden rounded-lg border", className)}>
+      <div
+        className={cn(
+          "border-border overflow-hidden rounded-lg border",
+          className,
+        )}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={proof.dataUrl}
           alt={proof.fileName}
-          className="max-h-80 w-full object-contain bg-white sm:max-h-96"
+          className="max-h-80 w-full bg-white object-contain sm:max-h-96"
         />
       </div>
     );
@@ -24,7 +29,12 @@ export function ProofPreview({ proof, className }: ProofPreviewProps) {
 
   if (proof.mimeType === "application/pdf") {
     return (
-      <div className={cn("border-border overflow-hidden rounded-lg border", className)}>
+      <div
+        className={cn(
+          "border-border overflow-hidden rounded-lg border",
+          className,
+        )}
+      >
         <iframe
           src={proof.dataUrl}
           title={proof.fileName}

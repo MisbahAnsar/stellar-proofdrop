@@ -6,11 +6,7 @@ import {
   validateProofFile,
 } from "@/lib/proof/validation";
 
-function createFile(
-  name: string,
-  type: string,
-  size: number,
-): File {
+function createFile(name: string, type: string, size: number): File {
   const content = new Uint8Array(size);
   return new File([content], name, { type });
 }
@@ -43,7 +39,11 @@ describe("validateProofFile", () => {
   });
 
   it("rejects files larger than the limit", () => {
-    const file = createFile("large.pdf", "application/pdf", PROOF_MAX_BYTES + 1);
+    const file = createFile(
+      "large.pdf",
+      "application/pdf",
+      PROOF_MAX_BYTES + 1,
+    );
     expect(validateProofFile(file)).toMatch(/5 MB/i);
   });
 });

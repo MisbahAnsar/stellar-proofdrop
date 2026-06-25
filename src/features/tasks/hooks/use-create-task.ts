@@ -48,16 +48,15 @@ export function useCreateTask() {
       const toastId = toast.loading("Creating task on-chain…");
 
       try {
-        const { taskId, transactionHash, ledger, events } =
-          await createTaskOnChain({
-            publicKey: input.creator,
-            rewardStroops,
-            contractId,
-            onProgress: ({ phase, message }) => {
-              setFlowState({ status: "pending", phase });
-              toast.loading(message, { id: toastId });
-            },
-          });
+        const { taskId, transactionHash, ledger } = await createTaskOnChain({
+          publicKey: input.creator,
+          rewardStroops,
+          contractId,
+          onProgress: ({ phase, message }) => {
+            setFlowState({ status: "pending", phase });
+            toast.loading(message, { id: toastId });
+          },
+        });
 
         const metadata = {
           taskId,
@@ -73,10 +72,6 @@ export function useCreateTask() {
         };
 
         saveTaskMetadata(metadata);
-
-        for (const event of events) {
-          taskEventBus.emitChainEvent(event);
-        }
 
         taskEventBus.emitTaskCreated(metadata);
 

@@ -4,7 +4,10 @@ import { LoadingRegion } from "@/components/feedback/loading-region";
 export function TaskDetailSkeleton() {
   return (
     <LoadingRegion label="Loading task" className="space-y-6">
-      <div className="border-border space-y-4 rounded-xl border p-6" aria-hidden="true">
+      <div
+        className="border-border space-y-4 rounded-xl border p-6"
+        aria-hidden="true"
+      >
         <Skeleton className="h-6 w-48" />
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-16 w-full" />

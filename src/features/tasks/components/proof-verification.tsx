@@ -11,9 +11,7 @@ export function ProofVerificationCard({
   return (
     <Alert variant={verification.matches ? "default" : "destructive"}>
       <AlertTitle>
-        {verification.matches
-          ? "Proof hash verified"
-          : "Proof hash mismatch"}
+        {verification.matches ? "Proof hash verified" : "Proof hash mismatch"}
       </AlertTitle>
       <AlertDescription className="space-y-2">
         <p className="font-mono text-xs break-all">

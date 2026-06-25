@@ -11,6 +11,7 @@ import { ContractError, getErrorMessage } from "@/lib/stellar/errors";
 import { approveTaskOnChain } from "@/services/stellar/approve-task";
 import { rejectTaskOnChain } from "@/services/stellar/reject-task";
 import type { TransactionPhase } from "@/services/stellar/transaction-types";
+import { deleteProof } from "@/services/proofs/proof-store";
 import { updateTaskMetadata } from "@/services/tasks/metadata-store";
 
 type ReviewTaskInput = {
@@ -49,7 +50,11 @@ export function useReviewTask() {
       }
 
       const toastId = toast.loading("Approving proof on-chain…");
-      setFlowState({ status: "pending", phase: "preparing", action: "approve" });
+      setFlowState({
+        status: "pending",
+        phase: "preparing",
+        action: "approve",
+      });
 
       try {
         const { transactionHash, ledger } = await approveTaskOnChain({
@@ -130,6 +135,8 @@ export function useReviewTask() {
         });
 
         const reviewedAt = new Date().toISOString();
+        deleteProof(taskId);
+
         const updatedTask = updateTaskMetadata(taskId, {
           status: "open",
           reviewAction: "rejected",

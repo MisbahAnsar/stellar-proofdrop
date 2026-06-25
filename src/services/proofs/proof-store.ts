@@ -21,15 +21,20 @@ function readAll(): StoredProof[] {
 }
 
 function writeAll(proofs: StoredProof[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(proofs));
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(proofs));
+  } catch {
+    // QuotaExceededError — fail silently for demo storage.
+  }
 }
 
 export function saveProof(proof: StoredProof) {
   const existing = readAll();
-  writeAll([
-    proof,
-    ...existing.filter((item) => item.taskId !== proof.taskId),
-  ]);
+  writeAll([proof, ...existing.filter((item) => item.taskId !== proof.taskId)]);
+}
+
+export function deleteProof(taskId: string) {
+  writeAll(readAll().filter((item) => item.taskId !== taskId));
 }
 
 export function getProof(taskId: string): StoredProof | undefined {

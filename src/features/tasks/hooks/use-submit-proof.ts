@@ -69,8 +69,6 @@ export function useSubmitProof() {
           submittedAt: new Date().toISOString(),
         };
 
-        saveProof(storedProof);
-
         const { transactionHash, ledger } = await submitProofOnChain({
           publicKey: worker,
           taskId,
@@ -81,6 +79,8 @@ export function useSubmitProof() {
             toast.loading(message, { id: toastId });
           },
         });
+
+        saveProof(storedProof);
 
         const updatedTask = updateTaskMetadata(taskId, {
           status: "proof_submitted",

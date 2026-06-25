@@ -20,25 +20,13 @@ import { SubmitProofForm } from "@/features/tasks/components/submit-proof-form";
 import { useProof, useTask } from "@/features/tasks/hooks/use-task";
 import { useReviewTask } from "@/features/tasks/hooks/use-review-task";
 import { useSubmitProof } from "@/features/tasks/hooks/use-submit-proof";
+import { formatTaskStatus } from "@/lib/tasks/status";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import { useWallet } from "@/hooks/use-wallet";
 
 type TaskDetailProps = {
   taskId: string;
 };
-
-function formatStatus(status?: string) {
-  switch (status) {
-    case "proof_submitted":
-      return "proof submitted";
-    case "approved":
-      return "approved";
-    case "open":
-      return "open";
-    default:
-      return status ?? "open";
-  }
-}
 
 export function TaskDetail({ taskId }: TaskDetailProps) {
   const { address } = useWallet();
@@ -95,24 +83,19 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={task.title}
-        description={`Task #${task.taskId}`}
-      />
+      <PageHeader title={task.title} description={`Task #${task.taskId}`} />
 
       <Card className="border-border ring-0">
         <CardHeader className="border-border border-b">
           <CardTitle className="text-base">Details</CardTitle>
-          <CardDescription>{formatStatus(task.status)}</CardDescription>
+          <CardDescription>{formatTaskStatus(task.status)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 pt-6">
           <p className="text-muted-foreground text-sm">{task.description}</p>
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-muted-foreground">Reward</dt>
-              <dd>
-                {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
-              </dd>
+              <dd>{formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM</dd>
             </div>
             {task.deadline ? (
               <div>
@@ -123,7 +106,9 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
             {task.proofHash ? (
               <div className="sm:col-span-2">
                 <dt className="text-muted-foreground">On-chain hash</dt>
-                <dd className="font-mono text-xs break-all">{task.proofHash}</dd>
+                <dd className="font-mono text-xs break-all">
+                  {task.proofHash}
+                </dd>
               </div>
             ) : null}
           </dl>
@@ -174,7 +159,9 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <ProofPreview proof={proof} />
-            <p className="font-mono text-xs break-all">SHA-256: {proof.sha256}</p>
+            <p className="font-mono text-xs break-all">
+              SHA-256: {proof.sha256}
+            </p>
             {verification ? (
               <ProofVerificationCard verification={verification} />
             ) : null}

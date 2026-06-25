@@ -38,7 +38,8 @@ export function getRecentActivity(limit = MAX_ENTRIES): ActivityEntry[] {
   return readAll()
     .sort(
       (left, right) =>
-        new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime(),
+        new Date(right.timestamp).getTime() -
+        new Date(left.timestamp).getTime(),
     )
     .slice(0, limit);
 }

@@ -10,19 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatTaskStatus } from "@/lib/tasks/status";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import type { TaskMetadata } from "@/types/task";
-
-function formatStatus(status?: string) {
-  switch (status) {
-    case "proof_submitted":
-      return "awaiting review";
-    case "approved":
-      return "approved";
-    default:
-      return status ?? "open";
-  }
-}
 
 type TaskListProps = {
   tasks: TaskMetadata[];
@@ -81,13 +71,13 @@ export function TaskList({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href={`/tasks/${task.taskId}`}
-                  className="text-foreground rounded-sm font-medium hover:underline focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
+                  className="text-foreground focus-visible:ring-ring rounded-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {task.title}
                 </Link>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-muted-foreground rounded border border-border px-2 py-0.5 text-xs">
-                    {formatStatus(task.status)}
+                  <span className="text-muted-foreground border-border rounded border px-2 py-0.5 text-xs">
+                    {formatTaskStatus(task.status)}
                   </span>
                   <span className="text-muted-foreground text-sm">
                     {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM

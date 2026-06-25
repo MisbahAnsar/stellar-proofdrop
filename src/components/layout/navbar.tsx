@@ -57,15 +57,12 @@ export function Navbar({ className }: NavbarProps) {
         <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Link
             href="/"
-            className="text-foreground shrink-0 text-sm font-semibold tracking-tight focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+            className="text-foreground focus-visible:ring-ring shrink-0 rounded-sm text-sm font-semibold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
           >
             {siteConfig.name}
           </Link>
 
-          <nav
-            aria-label="Main"
-            className="hidden items-center gap-1 md:flex"
-          >
+          <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
             {siteConfig.nav.map((item) => (
               <NavLink
                 key={item.href}

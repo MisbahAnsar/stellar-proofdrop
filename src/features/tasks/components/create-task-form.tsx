@@ -186,7 +186,9 @@ export function CreateTaskForm() {
                   placeholder="10"
                   aria-invalid={Boolean(form.formState.errors.reward)}
                   aria-describedby={
-                    form.formState.errors.reward ? "reward-error" : "reward-hint"
+                    form.formState.errors.reward
+                      ? "reward-error"
+                      : "reward-hint"
                   }
                   disabled={isPending}
                   {...form.register("reward")}
@@ -224,7 +226,10 @@ export function CreateTaskForm() {
                   message={form.formState.errors.deadline?.message}
                 />
                 {!form.formState.errors.deadline ? (
-                  <p id="deadline-hint" className="text-muted-foreground text-xs">
+                  <p
+                    id="deadline-hint"
+                    className="text-muted-foreground text-xs"
+                  >
                     Stored off-chain for now.
                   </p>
                 ) : null}

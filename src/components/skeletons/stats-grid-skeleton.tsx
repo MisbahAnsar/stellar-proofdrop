@@ -8,10 +8,7 @@ type StatsGridSkeletonProps = {
 export function StatsGridSkeleton({ count = 4 }: StatsGridSkeletonProps) {
   return (
     <LoadingRegion label="Loading stats">
-      <div
-        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
-        aria-hidden="true"
-      >
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-hidden="true">
         {Array.from({ length: count }).map((_, index) => (
           <div
             key={index}

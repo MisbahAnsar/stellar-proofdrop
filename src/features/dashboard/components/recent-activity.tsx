@@ -70,12 +70,12 @@ export function RecentActivity({
               >
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-muted-foreground rounded border border-border px-2 py-0.5 text-xs">
+                    <span className="text-muted-foreground border-border rounded border px-2 py-0.5 text-xs">
                       {activityLabel(entry.type)}
                     </span>
                     <Link
                       href={`/tasks/${entry.taskId}`}
-                      className="text-foreground rounded-sm text-sm hover:underline focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
+                      className="text-foreground focus-visible:ring-ring rounded-sm text-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
                     >
                       {entry.message}
                     </Link>

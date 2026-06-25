@@ -31,14 +31,14 @@ _Placeholder — screenshots coming soon._
 
 ## Stack
 
-| Layer | Technology |
-| ----- | ---------- |
-| Frontend | Next.js 16, React 19, TypeScript, Tailwind v4, shadcn/ui |
-| State | TanStack React Query, React Hook Form, Zod |
-| Wallet | Freighter (`@stellar/freighter-api`) |
-| Chain | `@stellar/stellar-sdk`, Soroban RPC |
-| Contracts | Rust, Soroban SDK 25 |
-| Tooling | Bun, Vitest, ESLint, Prettier, GitHub Actions |
+| Layer     | Technology                                               |
+| --------- | -------------------------------------------------------- |
+| Frontend  | Next.js 16, React 19, TypeScript, Tailwind v4, shadcn/ui |
+| State     | TanStack React Query, React Hook Form, Zod               |
+| Wallet    | Freighter (`@stellar/freighter-api`)                     |
+| Chain     | `@stellar/stellar-sdk`, Soroban RPC                      |
+| Contracts | Rust, Soroban SDK 25                                     |
+| Tooling   | Bun, Vitest, ESLint, Prettier, GitHub Actions            |
 
 ## Installation
 
@@ -83,12 +83,12 @@ bun start
 
 Copy [`.env.example`](.env.example) to `.env.local`:
 
-| Variable | Required | Description | Default |
-| -------- | -------- | ----------- | ------- |
-| `NEXT_PUBLIC_APP_URL` | No | Public app URL | `http://localhost:3000` |
-| `NEXT_PUBLIC_STELLAR_NETWORK` | No | `testnet` or `mainnet` | `testnet` |
-| `NEXT_PUBLIC_SOROBAN_RPC_URL` | No | Custom Soroban RPC URL | Network default |
-| `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` | Yes* | Deployed contract ID (`C…`) | — |
+| Variable                          | Required | Description                 | Default                 |
+| --------------------------------- | -------- | --------------------------- | ----------------------- |
+| `NEXT_PUBLIC_APP_URL`             | No       | Public app URL              | `http://localhost:3000` |
+| `NEXT_PUBLIC_STELLAR_NETWORK`     | No       | `testnet` or `mainnet`      | `testnet`               |
+| `NEXT_PUBLIC_SOROBAN_RPC_URL`     | No       | Custom Soroban RPC URL      | Network default         |
+| `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` | Yes\*    | Deployed contract ID (`C…`) | —                       |
 
 \*Required for on-chain flows. Validated at runtime in [`src/lib/env.ts`](src/lib/env.ts).
 
@@ -128,7 +128,7 @@ flowchart TB
 
 1. **Funds on-chain** — rewards are locked in the ProveIt contract until approval.
 2. **Proof off-chain** — file content stays local; only the hash is stored on-chain.
-3. **Event-driven UI** — `taskEventBus` + React Query keep lists in sync without reloads.
+3. **Event-driven UI** — Soroban RPC polling syncs metadata across wallets; `taskEventBus` + React Query keep lists fresh without reloads.
 4. **Thin client** — transaction helpers in `src/services/stellar/` follow prepare → sign → submit → confirm.
 
 ### Task lifecycle
@@ -142,7 +142,7 @@ Open → ProofSubmitted → Approved (payment released)
 
 ```
 stellar-proofdrop/
-├── .github/workflows/     # CI (lint, test, build)
+├── .github/workflows/     # CI (lint, format, test, build)
 ├── contracts/
 │   └── proveit/           # Soroban escrow contract (Rust)
 ├── docs/
@@ -183,15 +183,15 @@ Contract details: [`contracts/README.md`](contracts/README.md)
 
 The `proveit` contract escrows XLM and coordinates the task lifecycle.
 
-| Function | Who calls | Effect |
-| -------- | --------- | ------ |
-| `initialize` | Admin | Set reward token (XLM SAC) |
-| `create_task` | Creator | Lock XLM, emit `task_created` |
-| `submit_proof` | Worker | Store proof hash, emit `proof_submitted` |
-| `approve_task` | Creator | Pay worker, emit `task_approved` |
-| `reject_task` | Creator | Reopen task, emit `task_rejected` |
-| `get_task` | Anyone | Read task state |
-| `get_task_count` | Anyone | Total tasks |
+| Function         | Who calls | Effect                                   |
+| ---------------- | --------- | ---------------------------------------- |
+| `initialize`     | Admin     | Set reward token (XLM SAC)               |
+| `create_task`    | Creator   | Lock XLM, emit `task_created`            |
+| `submit_proof`   | Worker    | Store proof hash, emit `proof_submitted` |
+| `approve_task`   | Creator   | Pay worker, emit `task_approved`         |
+| `reject_task`    | Creator   | Reopen task, emit `task_rejected`        |
+| `get_task`       | Anyone    | Read task state                          |
+| `get_task_count` | Anyone    | Total tasks                              |
 
 **On-chain task fields:** `creator`, `reward`, `proof_hash`, `worker`, `status`
 
@@ -232,7 +232,7 @@ Restart `bun dev`.
 1. Open `/create` and connect Freighter as the **creator**
 2. Fill title, description, reward (e.g. `1` XLM), optional deadline
 3. Submit and approve the transaction in Freighter
-4. Confirm the task appears on `/` and `/dashboard`
+4. Confirm the task appears on `/dashboard` (home lists **open** tasks only)
 
 ### 4. Submit proof (worker wallet)
 
@@ -247,7 +247,9 @@ Restart `bun dev`.
 2. Find the task under **Pending reviews**
 3. **Approve** to release XLM to the worker, or **Reject** to reopen the task
 
-Activity and lists update automatically via event subscriptions.
+Activity and lists update automatically via Soroban event polling and the in-app event bus.
+
+**Multi-wallet demo:** Task metadata and proofs still live in each browser's `localStorage`, but opening the app polls Soroban contract events and merges task status into local storage — so a worker on another machine sees new tasks and proof/review updates without manual refresh.
 
 ## Deployment
 
@@ -277,26 +279,26 @@ After deployment:
 
 ## Testing
 
-| Suite | Command | Count |
-| ----- | ------- | ----- |
-| Frontend | `bun run test:frontend` | 20 tests |
-| Contracts | `bun run test:contracts` | 28 tests |
-| Full CI locally | `bun run ci` | lint + typecheck + tests + build |
+| Suite           | Command                  | Count                                     |
+| --------------- | ------------------------ | ----------------------------------------- |
+| Frontend        | `bun run test:frontend`  | 25 tests                                  |
+| Contracts       | `bun run test:contracts` | 28 tests                                  |
+| Full CI locally | `bun run ci`             | lint + format + typecheck + tests + build |
 
-GitHub Actions runs on every push/PR to `main`: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+GitHub Actions runs on every push/PR to `main` (lint, format check, typecheck, tests, build): [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 ## Developer notes
 
 ### Scripts
 
-| Command | Description |
-| ------- | ----------- |
-| `bun dev` | Development server |
-| `bun run build` | Production build |
-| `bun run lint` / `lint:fix` | ESLint |
-| `bun run format` | Prettier |
-| `bun run typecheck` | `tsc --noEmit` |
-| `bun run test:watch` | Vitest watch mode |
+| Command                           | Description            |
+| --------------------------------- | ---------------------- |
+| `bun dev`                         | Development server     |
+| `bun run build`                   | Production build       |
+| `bun run lint` / `lint:fix`       | ESLint                 |
+| `bun run format` / `format:check` | Prettier write / check |
+| `bun run typecheck`               | `tsc --noEmit`         |
+| `bun run test:watch`              | Vitest watch mode      |
 
 ### Conventions
 
@@ -314,7 +316,7 @@ bunx shadcn@latest add <component>
 
 ### Local storage limitation
 
-Task metadata and proof files are stored in `localStorage` for demo purposes. They are **per-browser** and not shared across devices. A backend is planned for production use.
+Task metadata and proof files are stored in `localStorage` for demo purposes. They are **per-browser** — proof file previews are not shared across devices. Soroban event polling merges on-chain status (open, proof submitted, approved) into local metadata so multi-wallet demos work when each participant has the app open.
 
 ## Future improvements
 

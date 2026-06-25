@@ -22,14 +22,12 @@ export function activityFromCreatedTask(task: TaskMetadata): ActivityEntry {
   };
 }
 
-export function activityFromUpdatedTask(task: TaskMetadata): ActivityEntry | null {
+export function activityFromUpdatedTask(
+  task: TaskMetadata,
+): ActivityEntry | null {
   if (task.status === "proof_submitted" && task.proofSubmittedAt) {
     return {
-      id: activityId(
-        "proof_submitted",
-        task.taskId,
-        task.proofTransactionHash,
-      ),
+      id: activityId("proof_submitted", task.taskId, task.proofTransactionHash),
       type: "proof_submitted",
       taskId: task.taskId,
       title: task.title,

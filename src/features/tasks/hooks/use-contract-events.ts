@@ -7,6 +7,7 @@ import { activityFromChainEvent } from "@/lib/dashboard/activity-from-task";
 import { taskEventBus } from "@/lib/events/task-bus";
 import { appendActivity } from "@/services/activity/activity-store";
 import { fetchProveItEvents } from "@/services/stellar/events";
+import { applyChainEventToMetadata } from "@/services/tasks/chain-metadata";
 
 const POLL_INTERVAL_MS = 15_000;
 const LEDGER_LOOKBACK = 1_000;
@@ -56,19 +57,11 @@ export function useContractEventListener() {
           seenEventsRef.current.add(key);
           maxLedger = Math.max(maxLedger, event.ledger);
 
+          applyChainEventToMetadata(event);
+
           const entry = activityFromChainEvent(event);
           appendActivity(entry);
           taskEventBus.emitActivity(entry);
-
-          if (event.type === "task_created") {
-            taskEventBus.emitChainEvent({
-              taskId: event.taskId,
-              creator: "",
-              rewardStroops: "0",
-              transactionHash: event.transactionHash,
-              ledger: event.ledger,
-            });
-          }
         }
 
         lastLedgerRef.current = maxLedger;

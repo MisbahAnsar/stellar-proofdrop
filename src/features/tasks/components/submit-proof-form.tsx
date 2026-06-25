@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TransactionStatus } from "@/features/tasks/components/transaction-status";
 import type { SubmitProofFlowState } from "@/features/tasks/hooks/use-submit-proof";
+import { canSubmitProof } from "@/lib/tasks/status";
 import { validateProofFile } from "@/lib/proof/validation";
 import { useWallet } from "@/hooks/use-wallet";
 import type { TaskMetadata } from "@/types/task";
@@ -42,7 +43,7 @@ export function SubmitProofForm({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const isSubmitted = task.status === "proof_submitted";
+  const isSubmitted = !canSubmitProof(task.status);
 
   function handleFileChange(file: File | null) {
     onResetFlow();
@@ -76,6 +77,17 @@ export function SubmitProofForm({
   }
 
   if (isSubmitted) {
+    if (task.status === "approved") {
+      return (
+        <Alert>
+          <AlertTitle>Task completed</AlertTitle>
+          <AlertDescription>
+            This task was approved and payment was released to the worker.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
     return (
       <Alert>
         <AlertTitle>Proof already submitted</AlertTitle>
@@ -133,19 +145,19 @@ export function SubmitProofForm({
         {flowState.status === "pending" ||
         flowState.status === "success" ||
         flowState.status === "error" ? (
-            <TransactionStatus
-              flowState={
-                flowState.status === "pending"
-                  ? { status: "pending", phase: flowState.phase }
-                  : flowState.status === "success"
-                    ? {
-                        status: "success",
-                        title: "Proof submitted successfully",
-                        description: `Hash ${flowState.proofHash.slice(0, 12)}… confirmed in ${flowState.transactionHash}`,
-                      }
-                    : { status: "error", message: flowState.message }
-              }
-            />
+          <TransactionStatus
+            flowState={
+              flowState.status === "pending"
+                ? { status: "pending", phase: flowState.phase }
+                : flowState.status === "success"
+                  ? {
+                      status: "success",
+                      title: "Proof submitted successfully",
+                      description: `Hash ${flowState.proofHash.slice(0, 12)}… confirmed in ${flowState.transactionHash}`,
+                    }
+                  : { status: "error", message: flowState.message }
+            }
+          />
         ) : null}
 
         <div className="space-y-2">
@@ -173,7 +185,10 @@ export function SubmitProofForm({
               {(selectedFile.size / 1024).toFixed(1)} KB)
             </p>
           ) : null}
-          <FieldError id="proof-file-error" message={validationError ?? undefined} />
+          <FieldError
+            id="proof-file-error"
+            message={validationError ?? undefined}
+          />
         </div>
       </CardContent>
 

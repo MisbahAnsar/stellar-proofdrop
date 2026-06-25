@@ -45,6 +45,18 @@ export function CreatorReviewForm({
     );
   }
 
+  if (task.status === "open" || !task.status) {
+    return (
+      <Alert>
+        <AlertTitle>Waiting for proof</AlertTitle>
+        <AlertDescription>
+          Workers can submit proof for this task. You will be able to review
+          once a proof hash is stored on-chain.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (task.status !== "proof_submitted") {
     return null;
   }

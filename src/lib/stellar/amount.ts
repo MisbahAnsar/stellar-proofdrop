@@ -5,8 +5,10 @@ export function xlmToStroops(xlm: number): bigint {
     throw new Error("Invalid XLM amount");
   }
 
-  const stroops = Math.round(xlm * Number(STROOPS_PER_XLM));
-  return BigInt(stroops);
+  const [wholePart = "0", fractionPart = ""] = xlm.toFixed(7).split(".");
+  const fraction = fractionPart.padEnd(7, "0").slice(0, 7);
+
+  return BigInt(wholePart) * STROOPS_PER_XLM + BigInt(fraction);
 }
 
 export function stroopsToXlm(stroops: bigint): number {

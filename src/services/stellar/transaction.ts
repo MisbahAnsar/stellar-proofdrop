@@ -21,6 +21,9 @@ export type ConfirmedTransaction = rpc.Api.GetSuccessfulTransactionResponse & {
   hash: string;
 };
 
+const MAX_POLL_ATTEMPTS = 60;
+const POLL_INTERVAL_MS = 1000;
+
 async function pollTransaction(
   server: rpc.Server,
   hash: string,
@@ -32,9 +35,18 @@ async function pollTransaction(
   });
 
   let response = await server.getTransaction(hash);
+  let attempts = 0;
 
   while (response.status === "NOT_FOUND") {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (attempts >= MAX_POLL_ATTEMPTS) {
+      throw new ContractError(
+        "Transaction confirmation timed out. Check the explorer and retry.",
+        "TRANSACTION_FAILED",
+      );
+    }
+
+    attempts += 1;
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     response = await server.getTransaction(hash);
   }
 

@@ -27,7 +27,9 @@ export function PageHeader({
           {title}
         </h1>
         {description ? (
-          <p className="text-muted-foreground max-w-2xl text-sm">{description}</p>
+          <p className="text-muted-foreground max-w-2xl text-sm">
+            {description}
+          </p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}

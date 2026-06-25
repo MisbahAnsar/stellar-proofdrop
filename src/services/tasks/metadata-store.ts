@@ -21,7 +21,11 @@ function readAll(): TaskMetadata[] {
 }
 
 function writeAll(metadata: TaskMetadata[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(metadata));
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(metadata));
+  } catch {
+    // QuotaExceededError or private browsing — fail silently for demo storage.
+  }
 }
 
 export function saveTaskMetadata(metadata: TaskMetadata) {
@@ -51,6 +55,33 @@ export function updateTaskMetadata(
   const index = existing.findIndex((item) => item.taskId === taskId);
   if (index === -1) {
     return undefined;
+  }
+
+  const updated = { ...existing[index], ...patch };
+  const next = [...existing];
+  next[index] = updated;
+  writeAll(next);
+  return updated;
+}
+
+export function upsertTaskMetadata(
+  taskId: string,
+  patch: Partial<TaskMetadata> & Pick<TaskMetadata, "title" | "description">,
+): TaskMetadata {
+  const existing = readAll();
+  const index = existing.findIndex((item) => item.taskId === taskId);
+
+  if (index === -1) {
+    const created: TaskMetadata = {
+      creator: patch.creator ?? "",
+      rewardStroops: patch.rewardStroops ?? "0",
+      transactionHash: patch.transactionHash ?? "",
+      createdAt: patch.createdAt ?? new Date().toISOString(),
+      ...patch,
+      taskId,
+    };
+    writeAll([created, ...existing]);
+    return created;
   }
 
   const updated = { ...existing[index], ...patch };

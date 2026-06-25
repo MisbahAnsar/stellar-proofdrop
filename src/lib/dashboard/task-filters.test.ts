@@ -29,11 +29,9 @@ describe("dashboard task filters", () => {
   ];
 
   it("filters my tasks by creator address", () => {
-    expect(filterMyTasks(tasks, "GCREATOR").map((item) => item.taskId)).toEqual([
-      "1",
-      "2",
-      "3",
-    ]);
+    expect(filterMyTasks(tasks, "GCREATOR").map((item) => item.taskId)).toEqual(
+      ["1", "2", "3"],
+    );
   });
 
   it("filters open tasks", () => {

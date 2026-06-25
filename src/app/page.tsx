@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
+import { filterOpenTasks } from "@/lib/dashboard/task-filters";
 
 export default function HomePage() {
   const { data: tasks = [], isLoading } = useTasks();
+  const openTasks = filterOpenTasks(tasks);
 
   return (
     <div className="space-y-8">
@@ -19,7 +21,7 @@ export default function HomePage() {
       />
 
       <TaskList
-        tasks={tasks}
+        tasks={openTasks}
         isLoading={isLoading}
         emptyTitle="No open tasks"
         emptyDescription="Fund a task to get started. Lists refresh automatically after on-chain confirmation."

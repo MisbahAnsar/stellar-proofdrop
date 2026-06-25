@@ -26,9 +26,7 @@ export function EmptyState({
         <p className="text-foreground text-sm font-medium">{title}</p>
         <p className="text-muted-foreground text-sm">{description}</p>
       </div>
-      {action ? (
-        <div className="flex flex-wrap gap-2">{action}</div>
-      ) : null}
+      {action ? <div className="flex flex-wrap gap-2">{action}</div> : null}
     </div>
   );
 }
