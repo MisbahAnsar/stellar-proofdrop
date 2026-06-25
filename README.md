@@ -32,6 +32,28 @@ https://stellar.expert/explorer/testnet/tx/b03dbaa8987faf96404ed49412fdfe2f085f7
 
 See also [`docs/demo-transactions.md`](docs/demo-transactions.md) and [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
 
+## Screenshots
+
+### Mobile responsive UI
+
+Production app at mobile viewport (~390px):
+
+| Tasks | Create task | Dashboard |
+| :---: | :---: | :---: |
+| ![Proofdrop tasks on mobile](docs/screenshots/mobile-tasks.png) | ![Create task form on mobile](docs/screenshots/mobile-create.png) | ![Dashboard on mobile](docs/screenshots/mobile-dashboard.png) |
+
+### CI/CD pipeline
+
+[GitHub Actions](https://github.com/MisbahAnsar/stellar-proofdrop/actions) on every push to `main` — lint, format, typecheck, frontend tests, build, and contract tests:
+
+![CI checks passing on GitHub](docs/screenshots/ci-pipeline.png)
+
+### Test output
+
+`bun run test:frontend` — **28 passing tests** across 8 files:
+
+![Vitest frontend test output](docs/screenshots/test-output.png)
+
 ## Features
 
 - Freighter wallet connect / disconnect

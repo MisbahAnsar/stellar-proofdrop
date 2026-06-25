@@ -1,13 +1,11 @@
 # Screenshots
 
-Add screenshots here for the README. Suggested captures:
+Assets referenced from the root README.
 
-| File               | Description                                 |
-| ------------------ | ------------------------------------------- |
-| `home.png`         | Task list on the home page                  |
-| `create-task.png`  | Create task form with wallet connected      |
-| `submit-proof.png` | Worker proof upload and preview             |
-| `dashboard.png`    | Dashboard with sections and recent activity |
-| `review.png`       | Creator approve/reject flow                 |
-
-Recommended width: 1280px. Keep the light theme — no gradients.
+| File                   | Description                          |
+| ---------------------- | ------------------------------------ |
+| `mobile-tasks.png`     | Home / task list (mobile viewport)   |
+| `mobile-create.png`    | Create task form (mobile viewport)   |
+| `mobile-dashboard.png` | Dashboard (mobile viewport)          |
+| `ci-pipeline.png`      | GitHub Actions checks passing        |
+| `test-output.png`      | `bun run test:frontend` Vitest output |
