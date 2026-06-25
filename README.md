@@ -38,8 +38,8 @@ See also [`docs/demo-transactions.md`](docs/demo-transactions.md) and [`docs/SUB
 
 Production app at mobile viewport (~390px):
 
-| Tasks | Create task | Dashboard |
-| :---: | :---: | :---: |
+|                              Tasks                              |                            Create task                            |                           Dashboard                           |
+| :-------------------------------------------------------------: | :---------------------------------------------------------------: | :-----------------------------------------------------------: |
 | ![Proofdrop tasks on mobile](docs/screenshots/mobile-tasks.png) | ![Create task form on mobile](docs/screenshots/mobile-create.png) | ![Dashboard on mobile](docs/screenshots/mobile-dashboard.png) |
 
 ### CI/CD pipeline
