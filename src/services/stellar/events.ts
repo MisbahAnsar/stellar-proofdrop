@@ -302,45 +302,6 @@ export function parseTaskRejectedEvents(
   );
 }
 
-export async function fetchTaskCreatedEvents(params: {
-  contractId: string;
-  startLedger: number;
-  limit?: number;
-}): Promise<TaskCreatedChainEvent[]> {
-  const { getRpcServer } = await import("@/services/stellar/rpc");
-  const server = getRpcServer();
-
-  const response = await server.getEvents({
-    startLedger: params.startLedger,
-    filters: [
-      {
-        type: "contract",
-        contractIds: [params.contractId],
-        topics: [TASK_CREATED_TOPICS],
-      },
-    ],
-    limit: params.limit ?? 100,
-  });
-
-  return response.events
-    .filter(
-      (event) => event.type === "contract" && event.inSuccessfulContractCall,
-    )
-    .map((event) => {
-      const data = parseTaskCreatedValue(event.value);
-      if (!data) {
-        return null;
-      }
-
-      return {
-        ...data,
-        transactionHash: event.txHash,
-        ledger: event.ledger,
-      };
-    })
-    .filter((event): event is TaskCreatedChainEvent => event !== null);
-}
-
 type ProveItRpcEvent = {
   type: "task_created" | "proof_submitted" | "task_approved" | "task_rejected";
   taskId: string;

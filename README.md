@@ -1,82 +1,68 @@
 # ProveIt
 
-Production-ready Stellar Soroban dApp for paid tasks with on-chain proof verification.
+[![CI](https://github.com/MisbahAnsar/stellar-proofdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/MisbahAnsar/stellar-proofdrop/actions/workflows/ci.yml)
 
-Users create small paid tasks, lock XLM in a smart contract, and release payment when proof is approved. Proof files are stored off-chain (local storage for now); only the SHA-256 hash is stored on-chain.
+Paid tasks with on-chain proof verification on **Stellar Soroban**.
+
+Creators fund tasks with XLM locked in a smart contract. Workers submit proof off-chain; only a **SHA-256 hash** is stored on-chain. Creators review submissions and release payment on approval.
+
+## Screenshots
+
+> Add images to [`docs/screenshots/`](docs/screenshots/) and uncomment the lines below.
+
+<!--
+![Home task list](docs/screenshots/home.png)
+![Create task](docs/screenshots/create-task.png)
+![Submit proof](docs/screenshots/submit-proof.png)
+![Dashboard](docs/screenshots/dashboard.png)
+![Creator review](docs/screenshots/review.png)
+-->
+
+_Placeholder — screenshots coming soon._
+
+## Features
+
+- Freighter wallet connect / disconnect
+- Create funded tasks on Soroban testnet
+- Proof upload with client-side hashing and local preview
+- Creator approve / reject with automatic payment release
+- Live dashboard with event-driven updates (no manual refresh)
+- Accessible UI: skeletons, empty states, error boundaries
 
 ## Stack
 
-- **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui
-- **Wallet:** Freighter (`@stellar/freighter-api`)
-- **Stellar:** `@stellar/stellar-sdk` (Soroban RPC)
-- **Data:** TanStack React Query v5, React Hook Form, Zod
-- **Contracts:** Rust, Soroban SDK 25
-- **Package manager:** Bun
+| Layer | Technology |
+| ----- | ---------- |
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind v4, shadcn/ui |
+| State | TanStack React Query, React Hook Form, Zod |
+| Wallet | Freighter (`@stellar/freighter-api`) |
+| Chain | `@stellar/stellar-sdk`, Soroban RPC |
+| Contracts | Rust, Soroban SDK 25 |
+| Tooling | Bun, Vitest, ESLint, Prettier, GitHub Actions |
 
-## Project structure
-
-```
-contracts/                  # Soroban smart contracts (Rust)
-└── proveit/                # Task escrow contract
-
-src/
-├── app/                    # Next.js routes
-├── components/
-│   ├── layout/             # App shell, navbar
-│   ├── ui/                 # shadcn/ui primitives
-│   └── wallet/             # Wallet connect / status UI
-├── config/                 # Site and Stellar network config
-├── features/tasks/         # Task forms, proof submission, hooks, event sync
-├── hooks/                  # Shared React hooks
-├── lib/
-│   ├── events/             # In-app task event bus
-│   ├── proof/              # SHA-256 hashing and file validation
-│   └── stellar/            # Amount helpers, errors
-├── providers/              # React Query, wallet context
-├── services/
-│   ├── proofs/             # Local proof file storage
-│   ├── stellar/            # Soroban transaction helpers
-│   ├── tasks/              # Off-chain task metadata store
-│   └── wallet/             # Freighter integration
-└── types/                  # Shared TypeScript types
-```
-
-See [contracts/README.md](contracts/README.md) for contract architecture details.
-
-## Getting started
+## Installation
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) (recommended) or Node.js 20+
+- [Bun](https://bun.sh) 1.1+ (or Node.js 20+)
 - [Freighter](https://www.freighter.app/) browser extension
-- Rust 1.84+ and `wasm32v1-none` target (for contracts)
+- [Rust](https://rustup.rs/) 1.84+ (for contracts only)
+- Stellar CLI / Soroban CLI (for contract deployment)
 
 ```bash
 rustup target add wasm32v1-none
 ```
 
-### Install
+### Setup
 
 ```bash
+git clone https://github.com/MisbahAnsar/stellar-proofdrop.git
+cd stellar-proofdrop
 bun install
-```
-
-### Environment variables
-
-Copy the example file and adjust as needed:
-
-```bash
 cp .env.example .env.local
 ```
 
-| Variable                          | Description                              | Default                 |
-| --------------------------------- | ---------------------------------------- | ----------------------- |
-| `NEXT_PUBLIC_APP_URL`             | Public app URL                           | `http://localhost:3000` |
-| `NEXT_PUBLIC_STELLAR_NETWORK`     | Stellar network (`testnet` \| `mainnet`) | `testnet`               |
-| `NEXT_PUBLIC_SOROBAN_RPC_URL`     | Soroban RPC endpoint (optional)          | network default         |
-| `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` | Deployed ProveIt contract ID             | —                       |
-
-Environment variables are validated at runtime via `src/lib/env.ts`.
+Edit `.env.local` and set `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` after deploying the contract (see [Deployment](#deployment)).
 
 ### Development
 
@@ -86,205 +72,267 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Frontend features
-
-### Wallet
-
-- Connect / disconnect via Freighter
-- Wallet status in navbar (truncated address + network)
-- Session hydration on page load
-
-### Create Task (`/create`)
-
-- Zod-validated form: title, description, reward (XLM), optional deadline
-- Full Soroban transaction flow: prepare → sign → submit → confirm
-- Pending, success, and failed states with inline status UI
-- Toast notifications for each transaction phase
-- Parses `TaskCreated` contract events from confirmed transactions
-- Off-chain metadata stored in `localStorage` (title, description, deadline)
-- Task list refreshes automatically via React Query (no page reload)
-
-### Submit Proof (`/tasks/[taskId]`)
-
-Workers open a task, upload proof, and submit only the hash on-chain:
-
-1. **File validation** — JPEG, PNG, WebP, PDF, or plain text up to 5 MB
-2. **Proof preview** — local preview of the selected or stored proof file
-3. **SHA-256 hash** — computed client-side before any chain call
-4. **Local storage** — full proof file saved in `localStorage` (mock off-chain store)
-5. **On-chain submit** — `submit_proof` stores the 32-byte hash and sets status to `ProofSubmitted`
-6. **Loading states** — hashing, transaction pending, success, and error UI
-7. **Creator verification** — compares local proof hash against the on-chain hash
-
-### Creator Review (`/tasks/[taskId]` and `/dashboard`)
-
-Creators see pending submissions and can approve or reject:
-
-1. **Pending queue** — dashboard lists tasks with `proof_submitted` status awaiting review
-2. **Approve** — releases locked XLM to the worker, sets status to `Approved`, emits `task_approved`
-3. **Reject** — clears proof hash, returns task to `Open` for resubmission, emits `task_rejected`
-4. **Transaction flow** — same prepare → sign → submit → confirm pattern with loading and error UI
-5. **Auto-refresh** — React Query + `taskEventBus` update lists and task detail without reload
-
-### Task list & events
-
-- Home (`/`) shows a live task list with links to task detail
-- `taskEventBus` broadcasts local create/update/refresh/activity events across pages
-- Background Soroban RPC `getEvents` listener polls contract events
-- React Query invalidation keeps dashboard and lists in sync after on-chain confirmation
-
-### Dashboard (`/dashboard`)
-
-Responsive overview with live sections — no manual refresh:
-
-| Section | Description |
-| ------- | ----------- |
-| **My Tasks** | Tasks you created |
-| **Open Tasks** | Tasks available for proof submission |
-| **Completed Tasks** | Approved and paid out |
-| **Pending Reviews** | Submissions awaiting your decision |
-| **Recent Activity** | Live feed from local and on-chain events |
-
-- Summary stat cards for each section
-- `taskEventBus` subscriptions + Soroban RPC polling keep tasks and activity in sync
-- React Query invalidation on create, update, and activity events
-
-## Scripts
-
-### Frontend
-
-| Command                  | Description                          |
-| ------------------------ | ------------------------------------ |
-| `bun dev`                | Start development server             |
-| `bun run build`          | Production build                     |
-| `bun start`              | Start production server              |
-| `bun run test`           | Run Vitest frontend tests            |
-| `bun run test:frontend`  | Run Vitest unit/component tests      |
-| `bun run test:contracts` | Run Soroban contract tests (Rust)    |
-| `bun run test:all`       | Run frontend + contract tests        |
-| `bun run test:watch`     | Run Vitest in watch mode             |
-| `bun run ci`             | Lint, typecheck, test, and build     |
-| `bun run lint`           | Run ESLint                           |
-| `bun run lint:fix`       | Run ESLint with auto-fix             |
-| `bun run format`         | Format with Prettier                 |
-| `bun run format:check`   | Check formatting                     |
-| `bun run typecheck`      | TypeScript type check                |
-
-### Contracts
-
-Run from the `contracts/` directory (or use `bun run test:contracts` from the repo root):
-
-| Command                                        | Description             |
-| ---------------------------------------------- | ----------------------- |
-| `cargo test`                                   | Run contract unit tests |
-| `cargo build --target wasm32v1-none --release` | Build optimized WASM    |
-
-## Testing
-
-### Frontend (Vitest)
-
-- **20 tests** across proof hashing, validation, storage, dashboard filters, activity store, and UI components
-- Runs in **jsdom** with `@testing-library/react` for component tests
-- Config: `vitest.config.ts`
+### Production build
 
 ```bash
-bun run test:frontend
+bun run build
+bun start
 ```
 
-### Contracts (Rust)
+## Environment variables
 
-- **28 unit tests** for task lifecycle, proof submission, creator review, events, and errors
-- Located in `contracts/proveit/src/tests/`
+Copy [`.env.example`](.env.example) to `.env.local`:
 
-```bash
-bun run test:contracts
+| Variable | Required | Description | Default |
+| -------- | -------- | ----------- | ------- |
+| `NEXT_PUBLIC_APP_URL` | No | Public app URL | `http://localhost:3000` |
+| `NEXT_PUBLIC_STELLAR_NETWORK` | No | `testnet` or `mainnet` | `testnet` |
+| `NEXT_PUBLIC_SOROBAN_RPC_URL` | No | Custom Soroban RPC URL | Network default |
+| `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` | Yes* | Deployed contract ID (`C…`) | — |
+
+\*Required for on-chain flows. Validated at runtime in [`src/lib/env.ts`](src/lib/env.ts).
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph client [Browser]
+    UI[Next.js App]
+    Wallet[Freighter Wallet]
+    LS[(localStorage)]
+    UI --> Wallet
+    UI --> LS
+  end
+
+  subgraph offchain [Off-chain today]
+    Meta[Task metadata]
+    Proof[Proof files]
+    Activity[Activity feed]
+    LS --- Meta
+    LS --- Proof
+    LS --- Activity
+  end
+
+  subgraph chain [Stellar Soroban]
+    Contract[ProveIt Contract]
+    SAC[XLM SAC]
+    Contract --> SAC
+  end
+
+  UI -->|sign tx| Wallet
+  UI -->|Soroban RPC| Contract
+  Contract -->|events| UI
 ```
 
-### Run everything locally
+**Design principles**
 
-```bash
-bun run test:all
-bun run ci
+1. **Funds on-chain** — rewards are locked in the ProveIt contract until approval.
+2. **Proof off-chain** — file content stays local; only the hash is stored on-chain.
+3. **Event-driven UI** — `taskEventBus` + React Query keep lists in sync without reloads.
+4. **Thin client** — transaction helpers in `src/services/stellar/` follow prepare → sign → submit → confirm.
+
+### Task lifecycle
+
+```
+Open → ProofSubmitted → Approved (payment released)
+                    ↘ Rejected → Open (resubmit)
 ```
 
-## Continuous integration
+## Folder structure
 
-GitHub Actions runs on every push and pull request to `main`:
+```
+stellar-proofdrop/
+├── .github/workflows/     # CI (lint, test, build)
+├── contracts/
+│   └── proveit/           # Soroban escrow contract (Rust)
+├── docs/
+│   └── screenshots/       # README screenshot assets
+├── src/
+│   ├── app/               # Next.js App Router pages
+│   ├── components/
+│   │   ├── feedback/      # Error fallback, loading regions
+│   │   ├── layout/        # Shell, navbar, page header
+│   │   ├── skeletons/     # Loading skeletons
+│   │   ├── ui/            # shadcn/ui primitives
+│   │   └── wallet/        # Freighter controls
+│   ├── config/            # Site + Stellar network config
+│   ├── features/
+│   │   ├── dashboard/     # Dashboard sections + activity
+│   │   └── tasks/         # Forms, hooks, task UI
+│   ├── lib/
+│   │   ├── dashboard/     # Filters, activity helpers
+│   │   ├── events/        # In-app event bus
+│   │   ├── proof/         # Hashing + validation
+│   │   └── stellar/       # Amounts, errors
+│   ├── providers/         # React Query, wallet, event sync
+│   ├── services/
+│   │   ├── activity/      # Activity localStorage store
+│   │   ├── proofs/        # Proof file store
+│   │   ├── stellar/       # Soroban transactions + events
+│   │   ├── tasks/         # Task metadata store
+│   │   └── wallet/        # Freighter integration
+│   └── types/             # Shared TypeScript types
+├── .env.example
+├── vitest.config.ts
+└── package.json
+```
 
-| Job        | Steps                                      |
-| ---------- | ------------------------------------------ |
-| Frontend   | `lint` → `typecheck` → `test:frontend` → `build` |
-| Contracts  | `cargo test` in `contracts/`               |
-
-Workflow file: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+Contract details: [`contracts/README.md`](contracts/README.md)
 
 ## Soroban contract
 
-The `proveit` contract supports task creation with on-chain fund locking, proof submission, and creator review.
+The `proveit` contract escrows XLM and coordinates the task lifecycle.
 
-| Function         | Description                                         |
-| ---------------- | --------------------------------------------------- |
-| `initialize`     | Configure the reward token (XLM SAC)                |
-| `create_task`    | Lock funds, store task, emit `TaskCreated` event      |
-| `submit_proof`   | Worker submits proof hash, emits `ProofSubmitted`   |
-| `approve_task`   | Creator approves, releases reward to worker           |
-| `reject_task`    | Creator rejects, reopens task for resubmission      |
-| `get_task`       | Read task by ID                                     |
-| `get_task_count` | Total tasks created                                 |
-| `get_token`      | Configured token address                            |
+| Function | Who calls | Effect |
+| -------- | --------- | ------ |
+| `initialize` | Admin | Set reward token (XLM SAC) |
+| `create_task` | Creator | Lock XLM, emit `task_created` |
+| `submit_proof` | Worker | Store proof hash, emit `proof_submitted` |
+| `approve_task` | Creator | Pay worker, emit `task_approved` |
+| `reject_task` | Creator | Reopen task, emit `task_rejected` |
+| `get_task` | Anyone | Read task state |
+| `get_task_count` | Anyone | Total tasks |
 
-Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twenty-eight unit tests cover initialization, validation, fund locking, proof submission, creator review, events, and error paths.
+**On-chain task fields:** `creator`, `reward`, `proof_hash`, `worker`, `status`
 
-> **Note:** Redeploy the contract after pulling contract changes before testing on testnet.
+**Events:** `task_created`, `proof_submitted`, `task_approved`, `task_rejected`
 
-## Tooling
+Build and test:
 
-### Tailwind CSS
+```bash
+bun run test:contracts
+cd contracts && cargo build --target wasm32v1-none --release
+```
 
-- Tailwind v4 with PostCSS (`postcss.config.mjs`)
-- Theme tokens in `src/app/globals.css`
-- Light theme only: white background, gray borders, no gradients
+Redeploy the contract after pulling contract changes before testing on testnet.
 
-### shadcn/ui
+## Demo instructions
 
-- Initialized with `components.json`
-- Add components: `bunx shadcn@latest add <component>`
+End-to-end walkthrough on **Stellar testnet**:
 
-## UI conventions
+### 1. Prepare wallets
 
-- **Light theme only** — no dark mode, no gradients
-- **White background** (`--background`)
-- **Gray borders** (`--border`)
-- **Minimal aesthetic** — clean cards, dashed empty states, skeleton loaders
-- **Accessibility** — skip link, focus rings, `aria-current` nav, form error associations, `role="alert"` for validation
-- **Loading** — skeleton placeholders instead of plain text; `keepPreviousData` to avoid list flicker on refresh
-- **Errors** — route-level `error.tsx` boundary and dedicated `not-found.tsx` page
-- **Reusable primitives** — `PageHeader`, `EmptyState`, `Skeleton`, `FieldError`, `LoadingRegion`, `ErrorFallback`
+- Install [Freighter](https://www.freighter.app/)
+- Switch Freighter to **Testnet**
+- Fund two accounts from a [friendbot faucet](https://laboratory.stellar.org/#account-creator?network=testnet) (creator + worker)
 
-## Completed
+### 2. Deploy contract
 
-- [x] Frontend scaffolding (`src/` architecture, layout, theme)
-- [x] Soroban contract architecture (`contracts/proveit`)
-- [x] Task creation with fund locking and events
-- [x] Contract unit tests (28 passing)
-- [x] Freighter wallet connect / disconnect / status
-- [x] Create Task page with Zod validation
-- [x] Soroban contract integration with transaction flow and events
-- [x] Toast notifications and automatic task list refresh
-- [x] Dashboard with local task metadata
-- [x] Proof submission (hash on-chain, file in local storage)
-- [x] Proof preview, validation, loading states, and creator verification
-- [x] Frontend unit tests (Vitest, 20 passing)
-- [x] GitHub Actions CI (lint, test, build on push)
-- [x] Creator review flow (approve/reject with payment release)
-- [x] Pending submissions dashboard and automatic UI refresh
-- [x] Full dashboard with task sections and recent activity feed
-- [x] UX polish: skeletons, empty states, 404/error boundaries, a11y, responsive layout
+Deploy `contracts/proveit` with your preferred Soroban workflow, then copy the contract ID into `.env.local`:
 
-## Next steps
+```env
+NEXT_PUBLIC_PROVEIT_CONTRACT_ID=C...
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
+```
 
-- Backend for off-chain task metadata and proof storage
+Restart `bun dev`.
+
+### 3. Create a task (creator wallet)
+
+1. Open `/create` and connect Freighter as the **creator**
+2. Fill title, description, reward (e.g. `1` XLM), optional deadline
+3. Submit and approve the transaction in Freighter
+4. Confirm the task appears on `/` and `/dashboard`
+
+### 4. Submit proof (worker wallet)
+
+1. Open the task from the home list (`/tasks/[id]`)
+2. Connect Freighter as the **worker**
+3. Upload a proof file (JPEG, PNG, WebP, PDF, or text ≤ 5 MB)
+4. Submit proof — only the hash is written on-chain
+
+### 5. Review (creator wallet)
+
+1. Open `/dashboard` as the **creator**
+2. Find the task under **Pending reviews**
+3. **Approve** to release XLM to the worker, or **Reject** to reopen the task
+
+Activity and lists update automatically via event subscriptions.
+
+## Deployment
+
+### Frontend (Vercel recommended)
+
+1. Push the repo to GitHub
+2. Import the project in [Vercel](https://vercel.com)
+3. Set environment variables (same as `.env.example`)
+4. Build command: `bun run build`
+5. Install command: `bun install`
+
+Works on any Node-compatible host — set `NEXT_PUBLIC_*` vars at build time.
+
+### Contract (testnet)
+
+```bash
+cd contracts
+cargo build --target wasm32v1-none --release
+# Deploy with Stellar/Soroban CLI — see Stellar docs for your CLI version
+```
+
+After deployment:
+
+1. Call `initialize` with the testnet XLM SAC address
+2. Set `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` in your frontend environment
+3. Redeploy the frontend
+
+## Testing
+
+| Suite | Command | Count |
+| ----- | ------- | ----- |
+| Frontend | `bun run test:frontend` | 20 tests |
+| Contracts | `bun run test:contracts` | 28 tests |
+| Full CI locally | `bun run ci` | lint + typecheck + tests + build |
+
+GitHub Actions runs on every push/PR to `main`: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+## Developer notes
+
+### Scripts
+
+| Command | Description |
+| ------- | ----------- |
+| `bun dev` | Development server |
+| `bun run build` | Production build |
+| `bun run lint` / `lint:fix` | ESLint |
+| `bun run format` | Prettier |
+| `bun run typecheck` | `tsc --noEmit` |
+| `bun run test:watch` | Vitest watch mode |
+
+### Conventions
+
+- **Light theme only** — white background, gray borders, no gradients
+- **Feature folders** — colocate UI, hooks, and schemas under `src/features/`
+- **Services** — side effects (RPC, storage) live in `src/services/`
+- **Event bus** — `taskEventBus` for cross-page refresh without prop drilling
+- **Transactions** — use `signAndSubmitTransaction` in `src/services/stellar/transaction.ts`
+
+### Adding shadcn components
+
+```bash
+bunx shadcn@latest add <component>
+```
+
+### Local storage limitation
+
+Task metadata and proof files are stored in `localStorage` for demo purposes. They are **per-browser** and not shared across devices. A backend is planned for production use.
+
+## Future improvements
+
+- [ ] Backend API for task metadata and proof storage (IPFS/S3)
+- [ ] On-chain `get_task` reads in the UI for cross-device consistency
+- [ ] Task cancellation and creator refunds
+- [ ] Deadline enforcement
+- [ ] Mainnet deployment guide and audited contract release
+- [ ] Multi-asset rewards beyond XLM SAC
+- [ ] Notification webhooks for proof submissions
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Run `bun run ci` before opening a PR
+4. Open a pull request with a clear description
 
 ## License
 
-Private — all rights reserved.
+[MIT](LICENSE)
