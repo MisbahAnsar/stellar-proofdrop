@@ -153,27 +153,70 @@ Responsive overview with live sections — no manual refresh:
 
 ### Frontend
 
-| Command                | Description              |
-| ---------------------- | ------------------------ |
-| `bun dev`              | Start development server |
-| `bun run build`        | Production build         |
-| `bun start`            | Start production server  |
-| `bun run test`         | Run Vitest unit tests    |
-| `bun run test:watch`   | Run Vitest in watch mode |
-| `bun run lint`         | Run ESLint               |
-| `bun run lint:fix`     | Run ESLint with auto-fix |
-| `bun run format`       | Format with Prettier     |
-| `bun run format:check` | Check formatting         |
-| `bun run typecheck`    | TypeScript type check    |
+| Command                  | Description                          |
+| ------------------------ | ------------------------------------ |
+| `bun dev`                | Start development server             |
+| `bun run build`          | Production build                     |
+| `bun start`              | Start production server              |
+| `bun run test`           | Run Vitest frontend tests            |
+| `bun run test:frontend`  | Run Vitest unit/component tests      |
+| `bun run test:contracts` | Run Soroban contract tests (Rust)    |
+| `bun run test:all`       | Run frontend + contract tests        |
+| `bun run test:watch`     | Run Vitest in watch mode             |
+| `bun run ci`             | Lint, typecheck, test, and build     |
+| `bun run lint`           | Run ESLint                           |
+| `bun run lint:fix`       | Run ESLint with auto-fix             |
+| `bun run format`         | Format with Prettier                 |
+| `bun run format:check`   | Check formatting                     |
+| `bun run typecheck`      | TypeScript type check                |
 
 ### Contracts
 
-Run from the `contracts/` directory:
+Run from the `contracts/` directory (or use `bun run test:contracts` from the repo root):
 
 | Command                                        | Description             |
 | ---------------------------------------------- | ----------------------- |
 | `cargo test`                                   | Run contract unit tests |
 | `cargo build --target wasm32v1-none --release` | Build optimized WASM    |
+
+## Testing
+
+### Frontend (Vitest)
+
+- **20 tests** across proof hashing, validation, storage, dashboard filters, activity store, and UI components
+- Runs in **jsdom** with `@testing-library/react` for component tests
+- Config: `vitest.config.ts`
+
+```bash
+bun run test:frontend
+```
+
+### Contracts (Rust)
+
+- **28 unit tests** for task lifecycle, proof submission, creator review, events, and errors
+- Located in `contracts/proveit/src/tests/`
+
+```bash
+bun run test:contracts
+```
+
+### Run everything locally
+
+```bash
+bun run test:all
+bun run ci
+```
+
+## Continuous integration
+
+GitHub Actions runs on every push and pull request to `main`:
+
+| Job        | Steps                                      |
+| ---------- | ------------------------------------------ |
+| Frontend   | `lint` → `typecheck` → `test:frontend` → `build` |
+| Contracts  | `cargo test` in `contracts/`               |
+
+Workflow file: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 ## Soroban contract
 
@@ -223,7 +266,7 @@ Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twen
 - [x] Frontend scaffolding (`src/` architecture, layout, theme)
 - [x] Soroban contract architecture (`contracts/proveit`)
 - [x] Task creation with fund locking and events
-- [x] Contract unit tests (18 passing)
+- [x] Contract unit tests (28 passing)
 - [x] Freighter wallet connect / disconnect / status
 - [x] Create Task page with Zod validation
 - [x] Soroban contract integration with transaction flow and events
@@ -231,7 +274,8 @@ Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twen
 - [x] Dashboard with local task metadata
 - [x] Proof submission (hash on-chain, file in local storage)
 - [x] Proof preview, validation, loading states, and creator verification
-- [x] Frontend unit tests (Vitest)
+- [x] Frontend unit tests (Vitest, 20 passing)
+- [x] GitHub Actions CI (lint, test, build on push)
 - [x] Creator review flow (approve/reject with payment release)
 - [x] Pending submissions dashboard and automatic UI refresh
 - [x] Full dashboard with task sections and recent activity feed

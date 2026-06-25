@@ -11,8 +11,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "bun run test:frontend",
+    "test:frontend": "vitest run",
+    "test:contracts": "cargo test --manifest-path contracts/Cargo.toml",
+    "test:all": "bun run test:frontend && bun run test:contracts",
+    "test:watch": "vitest",
+    "ci": "bun run lint && bun run typecheck && bun run test:all && bun run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -49,7 +53,9 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/dom": "^10.4.1"
   },
   "ignoreScripts": [
     "sharp",
