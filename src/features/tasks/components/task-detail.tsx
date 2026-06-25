@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TaskDetailSkeleton } from "@/components/skeletons/task-detail-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
 import { CreatorReviewForm } from "@/features/tasks/components/creator-review-form";
 import { ProofPreview } from "@/features/tasks/components/proof-preview";
 import { ProofVerificationCard } from "@/features/tasks/components/proof-verification";
@@ -57,20 +59,27 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
   } = useReviewTask();
 
   if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Loading task…</p>;
+    return <TaskDetailSkeleton />;
   }
 
   if (!task) {
     return (
-      <Alert variant="destructive">
-        <AlertTitle>Task not found</AlertTitle>
-        <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <span>This task is not available in local storage.</span>
-          <Button size="sm" variant="outline" render={<Link href="/" />}>
-            Back to tasks
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        <PageHeader
+          title="Task not found"
+          description="This task is not available in local storage."
+        />
+        <EmptyState
+          title="Task unavailable"
+          description="It may not exist yet or was created in another browser."
+          action={
+            <Button size="sm" variant="outline" render={<Link href="/" />}>
+              Back to tasks
+            </Button>
+          }
+          className="max-w-lg"
+        />
+      </div>
     );
   }
 
@@ -86,34 +95,38 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
 
   return (
     <div className="space-y-6">
+      <PageHeader
+        title={task.title}
+        description={`Task #${task.taskId}`}
+      />
+
       <Card className="border-border ring-0">
         <CardHeader className="border-border border-b">
-          <CardTitle>{task.title}</CardTitle>
-          <CardDescription>Task #{task.taskId}</CardDescription>
+          <CardTitle className="text-base">Details</CardTitle>
+          <CardDescription>{formatStatus(task.status)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 pt-6">
           <p className="text-muted-foreground text-sm">{task.description}</p>
-          <div className="grid gap-2 text-sm sm:grid-cols-2">
-            <p>
-              <span className="text-muted-foreground">Reward:</span>{" "}
-              {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
-            </p>
-            <p>
-              <span className="text-muted-foreground">Status:</span>{" "}
-              {formatStatus(task.status)}
-            </p>
+          <dl className="grid gap-2 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted-foreground">Reward</dt>
+              <dd>
+                {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
+              </dd>
+            </div>
             {task.deadline ? (
-              <p>
-                <span className="text-muted-foreground">Deadline:</span>{" "}
-                {new Date(task.deadline).toLocaleString()}
-              </p>
+              <div>
+                <dt className="text-muted-foreground">Deadline</dt>
+                <dd>{new Date(task.deadline).toLocaleString()}</dd>
+              </div>
             ) : null}
             {task.proofHash ? (
-              <p className="font-mono text-xs break-all sm:col-span-2">
-                On-chain hash: {task.proofHash}
-              </p>
+              <div className="sm:col-span-2">
+                <dt className="text-muted-foreground">On-chain hash</dt>
+                <dd className="font-mono text-xs break-all">{task.proofHash}</dd>
+              </div>
             ) : null}
-          </div>
+          </dl>
         </CardContent>
       </Card>
 
@@ -154,7 +167,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
       {proof ? (
         <Card className="border-border ring-0">
           <CardHeader className="border-border border-b">
-            <CardTitle>Proof preview</CardTitle>
+            <CardTitle className="text-base">Proof preview</CardTitle>
             <CardDescription>
               {proof.fileName} · stored locally for verification
             </CardDescription>
@@ -168,12 +181,11 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
           </CardContent>
         </Card>
       ) : task.proofHash ? (
-        <Alert>
-          <AlertTitle>Proof hash on-chain</AlertTitle>
-          <AlertDescription className="font-mono text-xs break-all">
-            {task.proofHash}
-          </AlertDescription>
-        </Alert>
+        <EmptyState
+          title="Proof hash on-chain"
+          description={task.proofHash}
+          className="font-mono text-xs break-all"
+        />
       ) : null}
     </div>
   );

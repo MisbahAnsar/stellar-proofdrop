@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TransactionStatus } from "@/features/tasks/components/transaction-status";
@@ -155,11 +156,15 @@ export function SubmitProofForm({
             type="file"
             accept="image/jpeg,image/png,image/webp,application/pdf,text/plain"
             disabled={isPending || !isConnected}
+            aria-invalid={Boolean(validationError)}
+            aria-describedby={
+              validationError ? "proof-file-error" : "proof-file-hint"
+            }
             onChange={(event) =>
               handleFileChange(event.target.files?.[0] ?? null)
             }
           />
-          <p className="text-muted-foreground text-xs">
+          <p id="proof-file-hint" className="text-muted-foreground text-xs">
             JPEG, PNG, WebP, PDF, or plain text up to 5 MB.
           </p>
           {selectedFile ? (
@@ -168,9 +173,7 @@ export function SubmitProofForm({
               {(selectedFile.size / 1024).toFixed(1)} KB)
             </p>
           ) : null}
-          {validationError ? (
-            <p className="text-destructive text-xs">{validationError}</p>
-          ) : null}
+          <FieldError id="proof-file-error" message={validationError ?? undefined} />
         </div>
       </CardContent>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ActivityListSkeleton } from "@/components/skeletons/activity-list-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Card,
   CardContent,
@@ -53,42 +54,44 @@ export function RecentActivity({
       </CardHeader>
       <CardContent className="pt-0">
         {isLoading ? (
-          <p className="text-muted-foreground py-6 text-sm">Loading…</p>
+          <ActivityListSkeleton />
         ) : entries.length === 0 ? (
-          <Alert className="mt-4">
-            <AlertTitle>No activity yet</AlertTitle>
-            <AlertDescription>
-              Create a task or submit proof to see updates here automatically.
-            </AlertDescription>
-          </Alert>
+          <EmptyState
+            className="mt-4"
+            title="No activity yet"
+            description="Create a task or submit proof to see updates here automatically."
+          />
         ) : (
-          <ul className="divide-border divide-y">
+          <ul className="divide-border divide-y" aria-label="Recent activity">
             {entries.map((entry) => (
               <li
                 key={entry.id}
                 className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between"
               >
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-muted-foreground rounded border border-border px-2 py-0.5 text-xs">
                       {activityLabel(entry.type)}
                     </span>
                     <Link
                       href={`/tasks/${entry.taskId}`}
-                      className="text-foreground text-sm hover:underline"
+                      className="text-foreground rounded-sm text-sm hover:underline focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
                     >
                       {entry.message}
                     </Link>
                   </div>
                   {entry.transactionHash ? (
-                    <p className="text-muted-foreground font-mono text-xs">
+                    <p className="text-muted-foreground font-mono text-xs break-all">
                       {entry.transactionHash.slice(0, 12)}…
                     </p>
                   ) : null}
                 </div>
-                <p className="text-muted-foreground shrink-0 text-xs">
+                <time
+                  dateTime={entry.timestamp}
+                  className="text-muted-foreground shrink-0 text-xs"
+                >
                   {formatActivityTime(entry.timestamp)}
-                </p>
+                </time>
               </li>
             ))}
           </ul>

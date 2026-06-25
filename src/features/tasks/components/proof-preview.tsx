@@ -16,7 +16,7 @@ export function ProofPreview({ proof, className }: ProofPreviewProps) {
         <img
           src={proof.dataUrl}
           alt={proof.fileName}
-          className="max-h-80 w-full object-contain bg-white"
+          className="max-h-80 w-full object-contain bg-white sm:max-h-96"
         />
       </div>
     );
@@ -28,7 +28,7 @@ export function ProofPreview({ proof, className }: ProofPreviewProps) {
         <iframe
           src={proof.dataUrl}
           title={proof.fileName}
-          className="h-80 w-full bg-white"
+          className="h-80 w-full bg-white sm:h-96"
         />
       </div>
     );
@@ -38,8 +38,9 @@ export function ProofPreview({ proof, className }: ProofPreviewProps) {
     const text = decodeTextDataUrl(proof.dataUrl);
     return (
       <pre
+        aria-label={`Text preview of ${proof.fileName}`}
         className={cn(
-          "border-border max-h-80 overflow-auto rounded-lg border bg-white p-4 text-xs whitespace-pre-wrap",
+          "border-border max-h-80 overflow-auto rounded-lg border bg-white p-4 text-xs whitespace-pre-wrap sm:max-h-96",
           className,
         )}
       >

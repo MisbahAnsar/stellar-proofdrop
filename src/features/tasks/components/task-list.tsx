@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CardListSkeleton } from "@/components/skeletons/card-list-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,6 +29,7 @@ type TaskListProps = {
   isLoading?: boolean;
   emptyTitle?: string;
   emptyDescription?: string;
+  title?: string;
 };
 
 export function TaskList({
@@ -35,12 +37,16 @@ export function TaskList({
   isLoading = false,
   emptyTitle = "No tasks yet",
   emptyDescription = "Create your first funded task to see it here.",
+  title = "Tasks",
 }: TaskListProps) {
   if (isLoading) {
     return (
       <Card className="border-border ring-0">
-        <CardContent className="text-muted-foreground py-8 text-sm">
-          Loading tasks…
+        <CardHeader className="border-border border-b">
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <CardListSkeleton rows={4} label={`Loading ${title.toLowerCase()}`} />
         </CardContent>
       </Card>
     );
@@ -48,50 +54,50 @@ export function TaskList({
 
   if (tasks.length === 0) {
     return (
-      <Alert>
-        <AlertTitle>{emptyTitle}</AlertTitle>
-        <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <span>{emptyDescription}</span>
+      <EmptyState
+        title={emptyTitle}
+        description={emptyDescription}
+        action={
           <Button size="sm" variant="outline" render={<Link href="/create" />}>
             Create Task
           </Button>
-        </AlertDescription>
-      </Alert>
+        }
+      />
     );
   }
 
   return (
     <Card className="border-border ring-0">
       <CardHeader className="border-border border-b">
-        <CardTitle>Tasks</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <CardDescription>
           {tasks.length} task{tasks.length === 1 ? "" : "s"} funded on-chain
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <ul className="divide-border divide-y">
+        <ul className="divide-border divide-y" aria-label={title}>
           {tasks.map((task) => (
             <li key={task.taskId} className="space-y-2 p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href={`/tasks/${task.taskId}`}
-                  className="text-foreground font-medium hover:underline"
+                  className="text-foreground rounded-sm font-medium hover:underline focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {task.title}
                 </Link>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-muted-foreground rounded border border-border px-2 py-0.5 text-xs">
                     {formatStatus(task.status)}
                   </span>
-                  <p className="text-muted-foreground text-sm">
+                  <span className="text-muted-foreground text-sm">
                     {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
-                  </p>
+                  </span>
                 </div>
               </div>
               <p className="text-muted-foreground line-clamp-2 text-sm">
                 {task.description}
               </p>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-muted-foreground text-xs break-words">
                 Task #{task.taskId}
                 {task.deadline
                   ? ` · Deadline ${new Date(task.deadline).toLocaleString()}`

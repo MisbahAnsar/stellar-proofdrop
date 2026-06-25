@@ -209,10 +209,14 @@ Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twen
 
 ## UI conventions
 
-- **Light theme only** — no dark mode
+- **Light theme only** — no dark mode, no gradients
 - **White background** (`--background`)
 - **Gray borders** (`--border`)
-- **Minimal aesthetic** — no gradients
+- **Minimal aesthetic** — clean cards, dashed empty states, skeleton loaders
+- **Accessibility** — skip link, focus rings, `aria-current` nav, form error associations, `role="alert"` for validation
+- **Loading** — skeleton placeholders instead of plain text; `keepPreviousData` to avoid list flicker on refresh
+- **Errors** — route-level `error.tsx` boundary and dedicated `not-found.tsx` page
+- **Reusable primitives** — `PageHeader`, `EmptyState`, `Skeleton`, `FieldError`, `LoadingRegion`, `ErrorFallback`
 
 ## Completed
 
@@ -231,6 +235,7 @@ Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twen
 - [x] Creator review flow (approve/reject with payment release)
 - [x] Pending submissions dashboard and automatic UI refresh
 - [x] Full dashboard with task sections and recent activity feed
+- [x] UX polish: skeletons, empty states, 404/error boundaries, a11y, responsive layout
 
 ## Next steps
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
@@ -11,18 +12,11 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-foreground text-2xl font-semibold tracking-tight">
-            ProveIt
-          </h1>
-          <p className="text-muted-foreground max-w-xl text-sm">
-            Create funded tasks on Stellar Soroban. Rewards are locked on-chain
-            until proof is approved.
-          </p>
-        </div>
-        <Button render={<Link href="/create" />}>Create Task</Button>
-      </section>
+      <PageHeader
+        title="ProveIt"
+        description="Create funded tasks on Stellar Soroban. Rewards are locked on-chain until proof is approved."
+        action={<Button render={<Link href="/create" />}>Create Task</Button>}
+      />
 
       <TaskList
         tasks={tasks}

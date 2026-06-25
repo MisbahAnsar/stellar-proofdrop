@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { activityKeys } from "@/features/tasks/query-keys";
@@ -12,6 +12,7 @@ export function useRecentActivity() {
     queryKey: activityKeys.recent(),
     queryFn: () => getRecentActivity(),
     staleTime: 0,
+    placeholderData: keepPreviousData,
   });
 }
 

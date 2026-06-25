@@ -1,7 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
+import { PageHeader } from "@/components/layout/page-header";
+import { StatsGridSkeleton } from "@/components/skeletons/stats-grid-skeleton";
 import { WalletStatus } from "@/components/wallet/wallet-controls";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/feedback/loading-region";
 import { DashboardSection } from "@/features/dashboard/components/dashboard-section";
 import { RecentActivity } from "@/features/dashboard/components/recent-activity";
 import { useDashboardTasks } from "@/features/dashboard/hooks/use-dashboard-tasks";
@@ -29,7 +33,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 export function DashboardView() {
-  const { isConnected, isReady } = useWallet();
+  const { isConnected, isReady, isConnecting, connect } = useWallet();
   const {
     myTasks,
     openTasks,
@@ -43,14 +47,10 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-foreground text-2xl font-semibold tracking-tight">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Tasks and activity update automatically via event subscriptions.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Tasks and activity update automatically via event subscriptions."
+      />
 
       <Card className="border-border ring-0">
         <CardHeader className="border-border border-b py-4">
@@ -58,27 +58,47 @@ export function DashboardView() {
           <CardDescription>Freighter connection</CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
-          {isReady ? (
+          {!isReady ? (
+            <LoadingRegion label="Loading wallet">
+              <div className="flex items-center gap-3" aria-hidden="true">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-8 w-28" />
+              </div>
+            </LoadingRegion>
+          ) : (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <WalletStatus className="items-start!" />
               {!isConnected ? (
-                <Button size="sm" render={<Link href="/create" />}>
-                  Connect wallet
+                <Button
+                  size="sm"
+                  disabled={isConnecting}
+                  onClick={() => void connect()}
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Connecting
+                    </>
+                  ) : (
+                    "Connect wallet"
+                  )}
                 </Button>
               ) : null}
             </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">Loading wallet…</p>
           )}
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="My tasks" value={counts.myTasks} />
-        <StatCard label="Open" value={counts.openTasks} />
-        <StatCard label="Completed" value={counts.completedTasks} />
-        <StatCard label="Pending review" value={counts.pendingReviews} />
-      </div>
+      {isLoading ? (
+        <StatsGridSkeleton />
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="My tasks" value={counts.myTasks} />
+          <StatCard label="Open" value={counts.openTasks} />
+          <StatCard label="Completed" value={counts.completedTasks} />
+          <StatCard label="Pending review" value={counts.pendingReviews} />
+        </div>
+      )}
 
       <RecentActivity entries={activity} isLoading={isActivityLoading} />
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CardListSkeleton } from "@/components/skeletons/card-list-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,13 +42,14 @@ export function DashboardSection({
       </CardHeader>
       <CardContent className="pt-0">
         {isLoading ? (
-          <p className="text-muted-foreground py-6 text-sm">Loading…</p>
+          <CardListSkeleton rows={3} label={`Loading ${title.toLowerCase()}`} />
         ) : tasks.length === 0 ? (
-          <Alert className="mt-4">
-            <AlertTitle>{emptyTitle}</AlertTitle>
-            <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <span>{emptyDescription}</span>
-              {actionHref && actionLabel ? (
+          <EmptyState
+            className="mt-4"
+            title={emptyTitle}
+            description={emptyDescription}
+            action={
+              actionHref && actionLabel ? (
                 <Button
                   size="sm"
                   variant="outline"
@@ -55,9 +57,9 @@ export function DashboardSection({
                 >
                   {actionLabel}
                 </Button>
-              ) : null}
-            </AlertDescription>
-          </Alert>
+              ) : undefined
+            }
+          />
         ) : (
           <ul className="divide-border divide-y">
             {tasks.map((task) => (

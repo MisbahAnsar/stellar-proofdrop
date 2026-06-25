@@ -1,3 +1,6 @@
+"use client";
+
+import { memo } from "react";
 import Link from "next/link";
 
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
@@ -18,13 +21,15 @@ type DashboardTaskRowProps = {
   task: TaskMetadata;
 };
 
-export function DashboardTaskRow({ task }: DashboardTaskRowProps) {
+export const DashboardTaskRow = memo(function DashboardTaskRow({
+  task,
+}: DashboardTaskRowProps) {
   return (
     <li className="space-y-1.5 py-3">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href={`/tasks/${task.taskId}`}
-          className="text-foreground text-sm font-medium hover:underline"
+          className="text-foreground rounded-sm text-sm font-medium hover:underline focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
         >
           {task.title}
         </Link>
@@ -45,4 +50,4 @@ export function DashboardTaskRow({ task }: DashboardTaskRowProps) {
       </p>
     </li>
   );
-}
+});

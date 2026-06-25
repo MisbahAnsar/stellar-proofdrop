@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { FieldError } from "@/components/ui/field-error";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { TaskList } from "@/features/tasks/components/task-list";
@@ -68,7 +69,9 @@ export function CreateTaskForm() {
     <div className="flex w-full flex-col gap-6">
       <Card className="border-border w-full max-w-2xl ring-0">
         <CardHeader className="border-border border-b">
-          <CardTitle>Create Task</CardTitle>
+          <CardTitle className="text-base" role="heading" aria-level={2}>
+            Task details
+          </CardTitle>
           <CardDescription>
             Lock XLM in the ProveIt contract and publish task details off-chain.
           </CardDescription>
@@ -138,14 +141,16 @@ export function CreateTaskForm() {
                 id="title"
                 placeholder="Verify GitHub contribution"
                 aria-invalid={Boolean(form.formState.errors.title)}
+                aria-describedby={
+                  form.formState.errors.title ? "title-error" : undefined
+                }
                 disabled={isPending}
                 {...form.register("title")}
               />
-              {form.formState.errors.title ? (
-                <p className="text-destructive text-xs">
-                  {form.formState.errors.title.message}
-                </p>
-              ) : null}
+              <FieldError
+                id="title-error"
+                message={form.formState.errors.title?.message}
+              />
             </div>
 
             <div className="space-y-2">
@@ -155,14 +160,18 @@ export function CreateTaskForm() {
                 placeholder="Describe what proof the worker must provide."
                 rows={5}
                 aria-invalid={Boolean(form.formState.errors.description)}
+                aria-describedby={
+                  form.formState.errors.description
+                    ? "description-error"
+                    : undefined
+                }
                 disabled={isPending}
                 {...form.register("description")}
               />
-              {form.formState.errors.description ? (
-                <p className="text-destructive text-xs">
-                  {form.formState.errors.description.message}
-                </p>
-              ) : null}
+              <FieldError
+                id="description-error"
+                message={form.formState.errors.description?.message}
+              />
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
@@ -176,18 +185,21 @@ export function CreateTaskForm() {
                   inputMode="decimal"
                   placeholder="10"
                   aria-invalid={Boolean(form.formState.errors.reward)}
+                  aria-describedby={
+                    form.formState.errors.reward ? "reward-error" : "reward-hint"
+                  }
                   disabled={isPending}
                   {...form.register("reward")}
                 />
-                {form.formState.errors.reward ? (
-                  <p className="text-destructive text-xs">
-                    {form.formState.errors.reward.message}
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground text-xs">
+                <FieldError
+                  id="reward-error"
+                  message={form.formState.errors.reward?.message}
+                />
+                {!form.formState.errors.reward ? (
+                  <p id="reward-hint" className="text-muted-foreground text-xs">
                     Funds are locked in the smart contract on submit.
                   </p>
-                )}
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -199,25 +211,30 @@ export function CreateTaskForm() {
                   id="deadline"
                   type="datetime-local"
                   aria-invalid={Boolean(form.formState.errors.deadline)}
+                  aria-describedby={
+                    form.formState.errors.deadline
+                      ? "deadline-error"
+                      : "deadline-hint"
+                  }
                   disabled={isPending}
                   {...form.register("deadline")}
                 />
-                {form.formState.errors.deadline ? (
-                  <p className="text-destructive text-xs">
-                    {form.formState.errors.deadline.message}
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground text-xs">
+                <FieldError
+                  id="deadline-error"
+                  message={form.formState.errors.deadline?.message}
+                />
+                {!form.formState.errors.deadline ? (
+                  <p id="deadline-hint" className="text-muted-foreground text-xs">
                     Stored off-chain for now.
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
           </CardContent>
 
           <CardFooter className="border-border flex flex-col gap-3 border-t sm:flex-row sm:justify-between">
             <p className="text-muted-foreground text-xs">
-              Proof submission is not available yet.
+              Tasks refresh automatically after on-chain confirmation.
             </p>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Button
