@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-import { getProveItContractId } from "@/config/stellar";
+import { getProofdropContractId } from "@/config/stellar";
 import { taskKeys } from "@/features/tasks/query-keys";
 import { taskEventBus } from "@/lib/events/task-bus";
 import { ContractError, getErrorMessage } from "@/lib/stellar/errors";
@@ -41,10 +41,10 @@ export function useReviewTask() {
 
   const approveMutation = useMutation({
     mutationFn: async ({ taskId, creator }: ReviewTaskInput) => {
-      const contractId = getProveItContractId();
+      const contractId = getProofdropContractId();
       if (!contractId) {
         throw new ContractError(
-          "ProveIt contract ID is not configured.",
+          "Proofdrop contract ID is not configured.",
           "NOT_CONFIGURED",
         );
       }
@@ -112,10 +112,10 @@ export function useReviewTask() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ taskId, creator }: ReviewTaskInput) => {
-      const contractId = getProveItContractId();
+      const contractId = getProofdropContractId();
       if (!contractId) {
         throw new ContractError(
-          "ProveIt contract ID is not configured.",
+          "Proofdrop contract ID is not configured.",
           "NOT_CONFIGURED",
         );
       }

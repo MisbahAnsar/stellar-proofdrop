@@ -1,8 +1,8 @@
 import { taskEventBus } from "@/lib/events/task-bus";
-import type { ProveItRpcEvent } from "@/services/stellar/events";
+import type { ProofdropRpcEvent } from "@/services/stellar/events";
 import { upsertTaskMetadata } from "@/services/tasks/metadata-store";
 
-export function applyChainEventToMetadata(event: ProveItRpcEvent) {
+export function applyChainEventToMetadata(event: ProofdropRpcEvent) {
   const timestamp = event.timestamp;
 
   switch (event.type) {

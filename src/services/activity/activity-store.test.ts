@@ -6,7 +6,7 @@ import {
 } from "@/services/activity/activity-store";
 import type { ActivityEntry } from "@/types/activity";
 
-const STORAGE_KEY = "proveit:activity";
+const STORAGE_KEY = "proofdrop:activity";
 
 const sampleEntry = (id: string): ActivityEntry => ({
   id,

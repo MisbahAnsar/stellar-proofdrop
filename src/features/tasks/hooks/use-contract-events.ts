@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-import { getProveItContractId } from "@/config/stellar";
+import { getProofdropContractId } from "@/config/stellar";
 import { activityFromChainEvent } from "@/lib/dashboard/activity-from-task";
 import { taskEventBus } from "@/lib/events/task-bus";
 import { appendActivity } from "@/services/activity/activity-store";
-import { fetchProveItEvents } from "@/services/stellar/events";
+import { fetchProofdropEvents } from "@/services/stellar/events";
 import { applyChainEventToMetadata } from "@/services/tasks/chain-metadata";
 
 const POLL_INTERVAL_MS = 15_000;
@@ -17,7 +17,7 @@ export function useContractEventListener() {
   const seenEventsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const contractId = getProveItContractId();
+    const contractId = getProofdropContractId();
     if (!contractId) {
       return;
     }
@@ -38,7 +38,7 @@ export function useContractEventListener() {
               (await server.getLatestLedger()).sequence - LEDGER_LOOKBACK,
             );
 
-        const events = await fetchProveItEvents({
+        const events = await fetchProofdropEvents({
           contractId: activeContractId,
           startLedger: latestLedger,
         });

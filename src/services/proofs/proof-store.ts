@@ -1,6 +1,6 @@
 import type { StoredProof } from "@/types/proof";
 
-const STORAGE_KEY = "proveit:proofs";
+const STORAGE_KEY = "proofdrop:proofs";
 
 function readAll(): StoredProof[] {
   if (typeof window === "undefined") {

@@ -17,7 +17,10 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <PageHeader title="Error" description="ProveIt encountered a problem." />
+      <PageHeader
+        title="Error"
+        description="Proofdrop encountered a problem."
+      />
       <ErrorFallback error={error} onRetry={reset} />
     </div>
   );

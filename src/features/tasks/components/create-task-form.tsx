@@ -28,14 +28,14 @@ import {
   type CreateTaskFormValues,
 } from "@/features/tasks/schemas/create-task";
 import { useWallet } from "@/hooks/use-wallet";
-import { getProveItContractId } from "@/config/stellar";
+import { getProofdropContractId } from "@/config/stellar";
 
 export function CreateTaskForm() {
   const { address, isConnected, isReady, connect, isConnecting } = useWallet();
   const { data: tasks = [], isLoading: isTasksLoading } = useTasks();
   const { mutateAsync, isPending, flowState, resetFlow } = useCreateTask();
 
-  const contractConfigured = Boolean(getProveItContractId());
+  const contractConfigured = Boolean(getProofdropContractId());
 
   const form = useForm<CreateTaskFormValues>({
     resolver: zodResolver(createTaskSchema),
@@ -73,7 +73,8 @@ export function CreateTaskForm() {
             Task details
           </CardTitle>
           <CardDescription>
-            Lock XLM in the ProveIt contract and publish task details off-chain.
+            Lock XLM in the Proofdrop contract and publish task details
+            off-chain.
           </CardDescription>
         </CardHeader>
 
@@ -83,7 +84,7 @@ export function CreateTaskForm() {
               <Alert variant="destructive">
                 <AlertTitle>Contract not configured</AlertTitle>
                 <AlertDescription>
-                  Set <code>NEXT_PUBLIC_PROVEIT_CONTRACT_ID</code> in{" "}
+                  Set <code>NEXT_PUBLIC_PROOFDROP_CONTRACT_ID</code> in{" "}
                   <code>.env.local</code> before creating tasks on-chain.
                 </AlertDescription>
               </Alert>

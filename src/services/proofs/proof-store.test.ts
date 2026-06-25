@@ -7,7 +7,7 @@ import {
 } from "@/services/proofs/proof-store";
 import type { StoredProof } from "@/types/proof";
 
-const STORAGE_KEY = "proveit:proofs";
+const STORAGE_KEY = "proofdrop:proofs";
 
 const sampleProof = (taskId: string): StoredProof => ({
   taskId,

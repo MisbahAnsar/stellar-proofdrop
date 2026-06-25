@@ -1,6 +1,6 @@
 import type { TaskMetadata } from "@/types/task";
 
-const STORAGE_KEY = "proveit:task-metadata";
+const STORAGE_KEY = "proofdrop:task-metadata";
 
 function readAll(): TaskMetadata[] {
   if (typeof window === "undefined") {

@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-import { getProveItContractId } from "@/config/stellar";
+import { getProofdropContractId } from "@/config/stellar";
 import { proofKeys, taskKeys } from "@/features/tasks/query-keys";
 import { taskEventBus } from "@/lib/events/task-bus";
 import { sha256HexFromFile } from "@/lib/proof/hash";
@@ -41,10 +41,10 @@ export function useSubmitProof() {
 
   const mutation = useMutation({
     mutationFn: async ({ taskId, file, worker }: SubmitProofInput) => {
-      const contractId = getProveItContractId();
+      const contractId = getProofdropContractId();
       if (!contractId) {
         throw new ContractError(
-          "ProveIt contract ID is not configured.",
+          "Proofdrop contract ID is not configured.",
           "NOT_CONFIGURED",
         );
       }

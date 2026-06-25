@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="ProveIt"
+        title="Proofdrop"
         description="Create funded tasks on Stellar Soroban. Rewards are locked on-chain until proof is approved."
         action={<Button render={<Link href="/create" />}>Create Task</Button>}
       />

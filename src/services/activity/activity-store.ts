@@ -1,6 +1,6 @@
 import type { ActivityEntry } from "@/types/activity";
 
-const STORAGE_KEY = "proveit:activity";
+const STORAGE_KEY = "proofdrop:activity";
 const MAX_ENTRIES = 50;
 
 function readAll(): ActivityEntry[] {

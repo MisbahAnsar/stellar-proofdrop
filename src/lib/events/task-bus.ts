@@ -2,10 +2,10 @@ import type { ActivityEntry } from "@/types/activity";
 import type { TaskMetadata } from "@/types/task";
 
 export const TASK_EVENTS = {
-  created: "proveit:task-created",
-  updated: "proveit:task-updated",
-  refresh: "proveit:tasks-refresh",
-  activity: "proveit:activity",
+  created: "proofdrop:task-created",
+  updated: "proofdrop:task-updated",
+  refresh: "proofdrop:tasks-refresh",
+  activity: "proofdrop:activity",
 } as const;
 
 type TaskCreatedDetail = {

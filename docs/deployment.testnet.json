@@ -1,0 +1,24 @@
+{
+  "network": "testnet",
+  "rpcUrl": "https://soroban-testnet.stellar.org",
+  "contractId": "CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC",
+  "xlmSac": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+  "deployer": "GCJCRXARMNLUYAHV7KMNMO3YPUNFEMYDC35KJZ5XPVMHGOAOXDRS25PA",
+  "wasmPath": "contracts/target/wasm32v1-none/release/proveit.wasm",
+  "transactions": {
+    "friendbotFunding": "2ab10309482a6193ad818c2b373182bfd06ec772b087dd7c851890f0e5fe195d",
+    "wasmUpload": "9dce8a126524d2a894527f410e0e251ccdc4c207c4b69c073ce6bbfb6db9b49c",
+    "contractDeploy": "ce9cb3624121b07519e5ef036199e688202d7ceb7b0ae1febac311909748ec74",
+    "initialize": "dcb8c99062bd602c8a414ba0cd0f9843ddc3c04e6bcadda38c34b7afe18b2bf9"
+  },
+  "explorers": {
+    "contract": "https://stellar.expert/explorer/testnet/contract/CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC",
+    "initializeTx": "https://stellar.expert/explorer/testnet/tx/dcb8c99062bd602c8a414ba0cd0f9843ddc3c04e6bcadda38c34b7afe18b2bf9"
+  },
+  "deployedAt": "2026-06-25T13:14:13.154Z",
+  "vercelEnv": {
+    "NEXT_PUBLIC_APP_URL": "https://proofdrop-stellar.vercel.app",
+    "NEXT_PUBLIC_STELLAR_NETWORK": "testnet",
+    "NEXT_PUBLIC_PROOFDROP_CONTRACT_ID": "CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC"
+  }
+}

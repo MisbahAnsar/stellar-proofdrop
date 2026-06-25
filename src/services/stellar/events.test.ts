@@ -1,7 +1,7 @@
 import { Address, xdr } from "@stellar/stellar-sdk";
 import { describe, expect, it } from "vitest";
 
-import { classifyProveItEventValue } from "./events";
+import { classifyProofdropEventValue } from "./events";
 
 const CREATOR = "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
 const WORKER = CREATOR;
@@ -29,7 +29,7 @@ function eventMap(fields: Record<string, unknown>): xdr.ScVal {
   return xdr.ScVal.scvMap(entries);
 }
 
-describe("classifyProveItEventValue", () => {
+describe("classifyProofdropEventValue", () => {
   it("classifies task_created events", () => {
     const value = eventMap({
       task_id: BigInt(1),
@@ -37,7 +37,7 @@ describe("classifyProveItEventValue", () => {
       reward: BigInt(10_000_000),
     });
 
-    expect(classifyProveItEventValue(value)).toEqual({
+    expect(classifyProofdropEventValue(value)).toEqual({
       type: "task_created",
       taskId: "1",
       message: "Task #1 created on-chain",
@@ -53,7 +53,7 @@ describe("classifyProveItEventValue", () => {
       proof_hash: new Uint8Array([0xab, 0xcd]),
     });
 
-    expect(classifyProveItEventValue(value)).toEqual({
+    expect(classifyProofdropEventValue(value)).toEqual({
       type: "proof_submitted",
       taskId: "2",
       message: "Proof submitted for task #2",
@@ -70,7 +70,7 @@ describe("classifyProveItEventValue", () => {
       reward: BigInt(5_000_000),
     });
 
-    expect(classifyProveItEventValue(value)).toEqual({
+    expect(classifyProofdropEventValue(value)).toEqual({
       type: "task_approved",
       taskId: "3",
       message: "Task #3 approved on-chain",
@@ -87,7 +87,7 @@ describe("classifyProveItEventValue", () => {
       worker: WORKER,
     });
 
-    expect(classifyProveItEventValue(value)).toEqual({
+    expect(classifyProofdropEventValue(value)).toEqual({
       type: "task_rejected",
       taskId: "4",
       message: "Task #4 proof rejected on-chain",
@@ -104,6 +104,6 @@ describe("classifyProveItEventValue", () => {
       }),
     ]);
 
-    expect(classifyProveItEventValue(value)).toBeNull();
+    expect(classifyProofdropEventValue(value)).toBeNull();
   });
 });

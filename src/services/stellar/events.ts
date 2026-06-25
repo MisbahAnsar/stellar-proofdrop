@@ -301,7 +301,7 @@ export function parseTaskRejectedEvents(
   );
 }
 
-export type ProveItRpcEvent = {
+export type ProofdropRpcEvent = {
   type: "task_created" | "proof_submitted" | "task_approved" | "task_rejected";
   taskId: string;
   transactionHash: string;
@@ -315,9 +315,9 @@ export type ProveItRpcEvent = {
 };
 
 /** Classify RPC event data. Order matters — specific parsers before generic ones. */
-export function classifyProveItEventValue(
+export function classifyProofdropEventValue(
   value: xdr.ScVal,
-): Omit<ProveItRpcEvent, "transactionHash" | "ledger" | "timestamp"> | null {
+): Omit<ProofdropRpcEvent, "transactionHash" | "ledger" | "timestamp"> | null {
   const proof = parseProofSubmittedValue(value);
   if (proof) {
     return {
@@ -366,11 +366,11 @@ export function classifyProveItEventValue(
   return null;
 }
 
-export async function fetchProveItEvents(params: {
+export async function fetchProofdropEvents(params: {
   contractId: string;
   startLedger: number;
   limit?: number;
-}): Promise<ProveItRpcEvent[]> {
+}): Promise<ProofdropRpcEvent[]> {
   const { getRpcServer } = await import("@/services/stellar/rpc");
   const server = getRpcServer();
 
@@ -401,14 +401,14 @@ export async function fetchProveItEvents(params: {
     limit: params.limit ?? 200,
   });
 
-  const parsed: ProveItRpcEvent[] = [];
+  const parsed: ProofdropRpcEvent[] = [];
 
   for (const event of response.events) {
     if (event.type !== "contract" || !event.inSuccessfulContractCall) {
       continue;
     }
 
-    const classified = classifyProveItEventValue(event.value);
+    const classified = classifyProofdropEventValue(event.value);
     if (!classified) {
       continue;
     }

@@ -43,6 +43,6 @@ export function getNetworkConfig(
   };
 }
 
-export function getProveItContractId(): string | undefined {
-  return env.NEXT_PUBLIC_PROVEIT_CONTRACT_ID;
+export function getProofdropContractId(): string | undefined {
+  return env.NEXT_PUBLIC_PROOFDROP_CONTRACT_ID;
 }

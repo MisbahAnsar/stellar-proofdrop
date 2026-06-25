@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-import { getProveItContractId } from "@/config/stellar";
+import { getProofdropContractId } from "@/config/stellar";
 import { taskKeys } from "@/features/tasks/query-keys";
 import type { CreateTaskFormValues } from "@/features/tasks/schemas/create-task";
 import { taskEventBus } from "@/lib/events/task-bus";
@@ -36,10 +36,10 @@ export function useCreateTask() {
 
   const mutation = useMutation({
     mutationFn: async (input: CreateTaskInput) => {
-      const contractId = getProveItContractId();
+      const contractId = getProofdropContractId();
       if (!contractId) {
         throw new ContractError(
-          "ProveIt contract ID is not configured. Set NEXT_PUBLIC_PROVEIT_CONTRACT_ID in your environment.",
+          "Proofdrop contract ID is not configured. Set NEXT_PUBLIC_PROOFDROP_CONTRACT_ID in your environment.",
           "NOT_CONFIGURED",
         );
       }

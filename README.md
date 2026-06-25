@@ -1,6 +1,10 @@
-# ProveIt
+# Proofdrop
 
 [![CI](https://github.com/MisbahAnsar/stellar-proofdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/MisbahAnsar/stellar-proofdrop/actions/workflows/ci.yml)
+
+**Live app:** [https://proofdrop-stellar.vercel.app](https://proofdrop-stellar.vercel.app)
+
+**Testnet contract:** `CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC` — see [`docs/deployment.testnet.json`](docs/deployment.testnet.json) and [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
 
 Paid tasks with on-chain proof verification on **Stellar Soroban**.
 
@@ -62,7 +66,7 @@ bun install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` and set `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` after deploying the contract (see [Deployment](#deployment)).
+Edit `.env.local` and set `NEXT_PUBLIC_PROOFDROP_CONTRACT_ID` after deploying the contract (see [Deployment](#deployment)).
 
 ### Development
 
@@ -83,14 +87,14 @@ bun start
 
 Copy [`.env.example`](.env.example) to `.env.local`:
 
-| Variable                          | Required | Description                 | Default                 |
-| --------------------------------- | -------- | --------------------------- | ----------------------- |
-| `NEXT_PUBLIC_APP_URL`             | No       | Public app URL              | `http://localhost:3000` |
-| `NEXT_PUBLIC_STELLAR_NETWORK`     | No       | `testnet` or `mainnet`      | `testnet`               |
-| `NEXT_PUBLIC_SOROBAN_RPC_URL`     | No       | Custom Soroban RPC URL      | Network default         |
-| `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` | Yes\*    | Deployed contract ID (`C…`) | —                       |
+| Variable                            | Required | Description                 | Default                                 |
+| ----------------------------------- | -------- | --------------------------- | --------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`               | No       | Public app URL              | `https://proofdrop-stellar.vercel.app`  |
+| `NEXT_PUBLIC_STELLAR_NETWORK`       | No       | `testnet` or `mainnet`      | `testnet`                               |
+| `NEXT_PUBLIC_SOROBAN_RPC_URL`       | No       | Custom Soroban RPC URL      | Network default (leave unset on Vercel) |
+| `NEXT_PUBLIC_PROOFDROP_CONTRACT_ID` | Yes\*    | Deployed contract ID (`C…`) | —                                       |
 
-\*Required for on-chain flows. Validated at runtime in [`src/lib/env.ts`](src/lib/env.ts).
+\*Required for on-chain flows. **Deployed testnet ID:** `CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC`
 
 ## Architecture
 
@@ -114,7 +118,7 @@ flowchart TB
   end
 
   subgraph chain [Stellar Soroban]
-    Contract[ProveIt Contract]
+    Contract[Proofdrop Contract]
     SAC[XLM SAC]
     Contract --> SAC
   end
@@ -126,10 +130,11 @@ flowchart TB
 
 **Design principles**
 
-1. **Funds on-chain** — rewards are locked in the ProveIt contract until approval.
+1. **Funds on-chain** — rewards are locked in the Proofdrop contract until approval.
 2. **Proof off-chain** — file content stays local; only the hash is stored on-chain.
 3. **Event-driven UI** — Soroban RPC polling syncs metadata across wallets; `taskEventBus` + React Query keep lists fresh without reloads.
 4. **Thin client** — transaction helpers in `src/services/stellar/` follow prepare → sign → submit → confirm.
+5. **Inter-contract calls** — the escrow contract uses Soroban `token::Client` to transfer XLM via the testnet Stellar Asset Contract (SAC).
 
 ### Task lifecycle
 
@@ -221,8 +226,9 @@ End-to-end walkthrough on **Stellar testnet**:
 Deploy `contracts/proveit` with your preferred Soroban workflow, then copy the contract ID into `.env.local`:
 
 ```env
-NEXT_PUBLIC_PROVEIT_CONTRACT_ID=C...
+NEXT_PUBLIC_PROOFDROP_CONTRACT_ID=C...
 NEXT_PUBLIC_STELLAR_NETWORK=testnet
+NEXT_PUBLIC_APP_URL=https://proofdrop-stellar.vercel.app
 ```
 
 Restart `bun dev`.
@@ -253,31 +259,74 @@ Activity and lists update automatically via Soroban event polling and the in-app
 
 ## Deployment
 
-### Frontend (Vercel recommended)
+### Frontend (Vercel)
 
-1. Push the repo to GitHub
-2. Import the project in [Vercel](https://vercel.com)
-3. Set environment variables (same as `.env.example`)
-4. Build command: `bun run build`
-5. Install command: `bun install`
+Production URL: **https://proofdrop-stellar.vercel.app**
 
-Works on any Node-compatible host — set `NEXT_PUBLIC_*` vars at build time.
+1. Import the repo in [Vercel](https://vercel.com)
+2. Framework preset: **Next.js** (or use included `vercel.json`)
+3. Add these **Environment Variables** (Production + Preview):
+
+```env
+NEXT_PUBLIC_APP_URL=https://proofdrop-stellar.vercel.app
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
+NEXT_PUBLIC_PROOFDROP_CONTRACT_ID=CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC
+```
+
+4. Leave `NEXT_PUBLIC_SOROBAN_RPC_URL` **unset** unless you use a custom RPC
+5. Deploy — build command `bun run build`, install `bun install`
+
+Works on any Node-compatible host — all `NEXT_PUBLIC_*` vars must be set at **build time**.
 
 ### Contract (testnet)
+
+Deployed contract and transaction hashes are recorded in [`docs/deployment.testnet.json`](docs/deployment.testnet.json).
 
 ```bash
 cd contracts
 cargo build --target wasm32v1-none --release
-# Deploy with Stellar/Soroban CLI — see Stellar docs for your CLI version
+bun run deploy:contract   # from repo root — uploads WASM, deploys, initializes
 ```
 
 After deployment:
 
-1. Call `initialize` with the testnet XLM SAC address
-2. Set `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` in your frontend environment
+1. `initialize` is called automatically with the testnet XLM SAC
+2. Set `NEXT_PUBLIC_PROOFDROP_CONTRACT_ID` in Vercel / `.env.local`
 3. Redeploy the frontend
 
-## Testing
+## How to test
+
+### Quick local test
+
+```bash
+bun install
+cp .env.example .env.local
+# Add your contract ID to .env.local
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000), connect Freighter on **Testnet**, and walk through create → submit proof → review.
+
+### Test against production
+
+1. Open [https://proofdrop-stellar.vercel.app](https://proofdrop-stellar.vercel.app)
+2. Install [Freighter](https://www.freighter.app/) and switch to **Testnet**
+3. Fund accounts via [Stellar Laboratory friendbot](https://laboratory.stellar.org/#account-creator?network=testnet)
+4. **Creator:** `/create` → fund a task → approve tx in Freighter
+5. **Worker:** open the task → upload proof → submit
+6. **Creator:** `/dashboard` → Pending reviews → Approve or Reject
+
+Transaction hashes appear in toasts and task metadata after confirmation.
+
+### Automated tests
+
+```bash
+bun run test:frontend   # 25 Vitest tests
+bun run test:contracts  # 28 Soroban contract tests
+bun run ci              # full pipeline including production build
+```
+
+## Testing (CI)
 
 | Suite           | Command                  | Count                                     |
 | --------------- | ------------------------ | ----------------------------------------- |
@@ -334,6 +383,10 @@ Task metadata and proof files are stored in `localStorage` for demo purposes. Th
 2. Create a feature branch
 3. Run `bun run ci` before opening a PR
 4. Open a pull request with a clear description
+
+## Submission
+
+See [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the full checklist, deployed contract address, transaction hashes, and items you need to capture manually (screenshots, demo video).
 
 ## License
 

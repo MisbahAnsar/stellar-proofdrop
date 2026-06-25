@@ -1,6 +1,6 @@
-# ProveIt Soroban Contracts
+# Proofdrop Soroban Contracts
 
-Rust smart contracts for the ProveIt task escrow protocol on Stellar Soroban.
+Rust smart contracts for the Proofdrop task escrow protocol on Stellar Soroban.
 
 ## Layout
 

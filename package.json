@@ -1,5 +1,5 @@
 {
-  "name": "stellar-proofdrop",
+  "name": "proofdrop",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -16,6 +16,7 @@
     "test:contracts": "cargo test --manifest-path contracts/Cargo.toml",
     "test:all": "bun run test:frontend && bun run test:contracts",
     "test:watch": "vitest",
+    "deploy:contract": "bun run scripts/deploy-contract.mjs",
     "ci": "bun run lint && bun run format:check && bun run typecheck && bun run test:all && bun run build"
   },
   "dependencies": {
