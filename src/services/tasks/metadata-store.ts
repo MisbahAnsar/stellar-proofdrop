@@ -33,7 +33,10 @@ export function saveTaskMetadata(metadata: TaskMetadata) {
 }
 
 export function getTaskMetadataList(): TaskMetadata[] {
-  return readAll();
+  return readAll().sort(
+    (left, right) =>
+      new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
 }
 
 export function getTaskMetadata(taskId: string): TaskMetadata | undefined {

@@ -26,9 +26,11 @@ src/
 │   ├── ui/                 # shadcn/ui primitives
 │   └── wallet/             # Wallet connect / status UI
 ├── config/                 # Site and Stellar network config
-├── features/tasks/           # Create task form, schema, hooks
+├── features/tasks/           # Create task form, schema, hooks, event sync
 ├── hooks/                  # Shared React hooks
-├── lib/                    # Utilities, env validation, Stellar helpers
+├── lib/
+│   ├── events/             # In-app task event bus
+│   └── stellar/            # Amount helpers, errors
 ├── providers/              # React Query, wallet context
 ├── services/
 │   ├── stellar/            # Soroban transaction helpers
@@ -93,14 +95,24 @@ Open [http://localhost:3000](http://localhost:3000).
 ### Create Task (`/create`)
 
 - Zod-validated form: title, description, reward (XLM), optional deadline
-- On-chain `create_task` invocation with fund locking
+- Full Soroban transaction flow: prepare → sign → submit → confirm
+- Pending, success, and failed states with inline status UI
+- Toast notifications for each transaction phase
+- Parses `TaskCreated` contract events from confirmed transactions
 - Off-chain metadata stored in `localStorage` (title, description, deadline)
-- Loading and error states throughout
+- Task list refreshes automatically via React Query (no page reload)
+
+### Task list & events
+
+- Home (`/`) and Dashboard (`/dashboard`) show live task lists
+- `taskEventBus` broadcasts local create/refresh events across pages
+- Background Soroban RPC `getEvents` listener polls for `task_created` events
+- React Query invalidation keeps lists in sync after on-chain confirmation
 
 ### Dashboard (`/dashboard`)
 
 - Wallet status overview
-- Locally stored tasks from this browser
+- Funded tasks with reward, deadline, and ledger metadata
 
 ## Scripts
 
@@ -168,6 +180,8 @@ Each task stores `creator`, `reward`, `proof_hash` (placeholder), and `status`. 
 - [x] Contract unit tests (12 passing)
 - [x] Freighter wallet connect / disconnect / status
 - [x] Create Task page with Zod validation
+- [x] Soroban contract integration with transaction flow and events
+- [x] Toast notifications and automatic task list refresh
 - [x] Dashboard with local task metadata
 
 ## Next steps
@@ -175,7 +189,6 @@ Each task stores `creator`, `reward`, `proof_hash` (placeholder), and `status`. 
 - Proof submission and approval handlers
 - Payment release on approval
 - Backend for off-chain task metadata
-- TypeScript contract bindings
 
 ## License
 

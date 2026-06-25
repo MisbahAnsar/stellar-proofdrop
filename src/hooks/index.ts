@@ -1,1 +1,2 @@
-// Shared React hooks will be exported from this module.
+export { useWallet } from "@/providers/wallet-provider";
+export { useTasks } from "@/features/tasks/hooks/use-tasks";

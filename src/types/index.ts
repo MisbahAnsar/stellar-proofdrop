@@ -3,4 +3,4 @@ export type NavItem = {
   href: string;
 };
 
-export type { TaskMetadata } from "./task";
+export type { TaskMetadata, TaskCreatedChainEvent } from "./task";
