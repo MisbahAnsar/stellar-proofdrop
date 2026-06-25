@@ -1,10 +1,16 @@
 import { scValToNative, xdr } from "@stellar/stellar-sdk";
 
 import type { ProofSubmittedChainEvent } from "@/types/proof";
-import type { TaskCreatedChainEvent } from "@/types/task";
+import type {
+  TaskApprovedChainEvent,
+  TaskCreatedChainEvent,
+  TaskRejectedChainEvent,
+} from "@/types/task";
 
 const TASK_CREATED_TOPICS = ["task", "created"];
 const PROOF_SUBMITTED_TOPICS = ["task", "proof_submitted"];
+const TASK_APPROVED_TOPICS = ["task", "approved"];
+const TASK_REJECTED_TOPICS = ["task", "rejected"];
 
 function topicToString(topic: xdr.ScVal): string | null {
   switch (topic.switch()) {
@@ -134,6 +140,72 @@ function parseProofSubmittedValue(value: xdr.ScVal): {
   };
 }
 
+function parseTaskApprovedValue(value: xdr.ScVal): {
+  taskId: string;
+  creator: string;
+  worker: string;
+  rewardStroops: string;
+} | null {
+  const fields = parseMapFields(value);
+  if (!fields) {
+    return null;
+  }
+
+  if (
+    typeof fields.task_id !== "bigint" &&
+    typeof fields.task_id !== "number"
+  ) {
+    return null;
+  }
+
+  const creator = normalizeAddress(fields.creator);
+  const worker = normalizeAddress(fields.worker);
+  if (!creator || !worker) {
+    return null;
+  }
+
+  if (typeof fields.reward !== "bigint" && typeof fields.reward !== "number") {
+    return null;
+  }
+
+  return {
+    taskId: fields.task_id.toString(),
+    creator,
+    worker,
+    rewardStroops: fields.reward.toString(),
+  };
+}
+
+function parseTaskRejectedValue(value: xdr.ScVal): {
+  taskId: string;
+  creator: string;
+  worker: string;
+} | null {
+  const fields = parseMapFields(value);
+  if (!fields) {
+    return null;
+  }
+
+  if (
+    typeof fields.task_id !== "bigint" &&
+    typeof fields.task_id !== "number"
+  ) {
+    return null;
+  }
+
+  const creator = normalizeAddress(fields.creator);
+  const worker = normalizeAddress(fields.worker);
+  if (!creator || !worker) {
+    return null;
+  }
+
+  return {
+    taskId: fields.task_id.toString(),
+    creator,
+    worker,
+  };
+}
+
 function parseContractEvents<TBase>(
   events: xdr.ContractEvent[],
   topics: string[],
@@ -197,6 +269,34 @@ export function parseProofSubmittedEvents(
     events,
     PROOF_SUBMITTED_TOPICS,
     parseProofSubmittedValue,
+    transactionHash,
+    ledger,
+  );
+}
+
+export function parseTaskApprovedEvents(
+  events: xdr.ContractEvent[],
+  transactionHash: string,
+  ledger: number,
+): TaskApprovedChainEvent[] {
+  return parseContractEvents(
+    events,
+    TASK_APPROVED_TOPICS,
+    parseTaskApprovedValue,
+    transactionHash,
+    ledger,
+  );
+}
+
+export function parseTaskRejectedEvents(
+  events: xdr.ContractEvent[],
+  transactionHash: string,
+  ledger: number,
+): TaskRejectedChainEvent[] {
+  return parseContractEvents(
+    events,
+    TASK_REJECTED_TOPICS,
+    parseTaskRejectedValue,
     transactionHash,
     ledger,
   );

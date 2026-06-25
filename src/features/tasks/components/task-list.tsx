@@ -12,6 +12,17 @@ import {
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import type { TaskMetadata } from "@/types/task";
 
+function formatStatus(status?: string) {
+  switch (status) {
+    case "proof_submitted":
+      return "awaiting review";
+    case "approved":
+      return "approved";
+    default:
+      return status ?? "open";
+  }
+}
+
 type TaskListProps = {
   tasks: TaskMetadata[];
   isLoading?: boolean;
@@ -70,7 +81,7 @@ export function TaskList({
                 </Link>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground rounded border border-border px-2 py-0.5 text-xs">
-                    {task.status ?? "open"}
+                    {formatStatus(task.status)}
                   </span>
                   <p className="text-muted-foreground text-sm">
                     {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM

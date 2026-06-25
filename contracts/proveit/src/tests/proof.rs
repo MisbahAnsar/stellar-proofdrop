@@ -4,20 +4,7 @@ use crate::errors::ContractError as Error;
 use crate::events::ProofSubmittedEvent;
 use crate::types::TaskStatus;
 
-use super::common::{mint, setup};
-
-fn sample_proof_hash(env: &soroban_sdk::Env) -> BytesN<32> {
-    BytesN::from_array(env, &[7u8; 32])
-}
-
-fn create_open_task(
-    ctx: &super::common::TestContext,
-    creator: &Address,
-    reward: i128,
-) -> u64 {
-    mint(ctx, creator, reward);
-    ctx.client.create_task(creator, &reward)
-}
+use super::common::{create_open_task, sample_proof_hash, setup};
 
 #[test]
 fn submit_proof_stores_hash_and_updates_status() {

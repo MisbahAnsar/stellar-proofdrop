@@ -116,6 +116,16 @@ Workers open a task, upload proof, and submit only the hash on-chain:
 6. **Loading states** — hashing, transaction pending, success, and error UI
 7. **Creator verification** — compares local proof hash against the on-chain hash
 
+### Creator Review (`/tasks/[taskId]` and `/dashboard`)
+
+Creators see pending submissions and can approve or reject:
+
+1. **Pending queue** — dashboard lists tasks with `proof_submitted` status awaiting review
+2. **Approve** — releases locked XLM to the worker, sets status to `Approved`, emits `task_approved`
+3. **Reject** — clears proof hash, returns task to `Open` for resubmission, emits `task_rejected`
+4. **Transaction flow** — same prepare → sign → submit → confirm pattern with loading and error UI
+5. **Auto-refresh** — React Query + `taskEventBus` update lists and task detail without reload
+
 ### Task list & events
 
 - Home (`/`) and Dashboard (`/dashboard`) show live task lists with links to task detail
@@ -126,6 +136,7 @@ Workers open a task, upload proof, and submit only the hash on-chain:
 ### Dashboard (`/dashboard`)
 
 - Wallet status overview
+- Pending proof submissions awaiting creator review
 - Funded tasks with reward, deadline, and ledger metadata
 
 ## Scripts
@@ -156,20 +167,22 @@ Run from the `contracts/` directory:
 
 ## Soroban contract
 
-The `proveit` contract supports task creation with on-chain fund locking and proof submission.
+The `proveit` contract supports task creation with on-chain fund locking, proof submission, and creator review.
 
 | Function         | Description                                         |
 | ---------------- | --------------------------------------------------- |
 | `initialize`     | Configure the reward token (XLM SAC)                |
 | `create_task`    | Lock funds, store task, emit `TaskCreated` event      |
 | `submit_proof`   | Worker submits proof hash, emits `ProofSubmitted`   |
+| `approve_task`   | Creator approves, releases reward to worker           |
+| `reject_task`    | Creator rejects, reopens task for resubmission      |
 | `get_task`       | Read task by ID                                     |
 | `get_task_count` | Total tasks created                                 |
 | `get_token`      | Configured token address                            |
 
-Each task stores `creator`, `reward`, `proof_hash`, and `status`. Eighteen unit tests cover initialization, validation, fund locking, proof submission, events, and error paths.
+Each task stores `creator`, `reward`, `proof_hash`, `worker`, and `status`. Twenty-eight unit tests cover initialization, validation, fund locking, proof submission, creator review, events, and error paths.
 
-> **Note:** Redeploy the contract after pulling `submit_proof` changes before testing proof submission on testnet.
+> **Note:** Redeploy the contract after pulling contract changes before testing on testnet.
 
 ## Tooling
 
@@ -205,11 +218,11 @@ Each task stores `creator`, `reward`, `proof_hash`, and `status`. Eighteen unit 
 - [x] Proof submission (hash on-chain, file in local storage)
 - [x] Proof preview, validation, loading states, and creator verification
 - [x] Frontend unit tests (Vitest)
+- [x] Creator review flow (approve/reject with payment release)
+- [x] Pending submissions dashboard and automatic UI refresh
 
 ## Next steps
 
-- Creator approval / rejection handlers
-- Payment release on approval
 - Backend for off-chain task metadata and proof storage
 
 ## License

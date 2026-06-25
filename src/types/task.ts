@@ -15,12 +15,33 @@ export type TaskMetadata = {
   proofSubmittedBy?: string;
   proofSubmittedAt?: string;
   proofTransactionHash?: string;
+  reviewTransactionHash?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  reviewAction?: "approved" | "rejected";
 };
 
 export type TaskCreatedChainEvent = {
   taskId: string;
   creator: string;
   rewardStroops: string;
+  transactionHash: string;
+  ledger: number;
+};
+
+export type TaskApprovedChainEvent = {
+  taskId: string;
+  creator: string;
+  worker: string;
+  rewardStroops: string;
+  transactionHash: string;
+  ledger: number;
+};
+
+export type TaskRejectedChainEvent = {
+  taskId: string;
+  creator: string;
+  worker: string;
   transactionHash: string;
   ledger: number;
 };

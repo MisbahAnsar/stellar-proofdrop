@@ -20,4 +20,5 @@ pub struct Task {
     pub reward: i128,
     pub proof_hash: BytesN<32>,
     pub status: TaskStatus,
+    pub worker: Option<Address>,
 }

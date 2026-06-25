@@ -11,4 +11,6 @@ pub enum ContractError {
     InsufficientBalance = 5,
     InvalidProofHash = 6,
     InvalidTaskStatus = 7,
+    NotCreator = 8,
+    WorkerNotSet = 9,
 }

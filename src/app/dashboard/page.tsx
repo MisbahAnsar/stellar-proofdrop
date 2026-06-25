@@ -11,13 +11,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PendingReviewList } from "@/features/tasks/components/pending-review-list";
 import { TaskList } from "@/features/tasks/components/task-list";
+import { usePendingReviews } from "@/features/tasks/hooks/use-pending-reviews";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
 import { useWallet } from "@/hooks/use-wallet";
 
 export default function DashboardPage() {
-  const { isConnected, isReady } = useWallet();
+  const { address, isConnected, isReady } = useWallet();
   const { data: tasks = [], isLoading } = useTasks();
+  const { count: pendingCount } = usePendingReviews();
 
   return (
     <div className="space-y-6">
@@ -26,8 +29,8 @@ export default function DashboardPage() {
           Dashboard
         </h1>
         <p className="text-muted-foreground text-sm">
-          Wallet status and your funded tasks. Updates automatically via
-          on-chain events.
+          Wallet status, pending proof reviews, and your funded tasks. Updates
+          automatically via on-chain events.
         </p>
       </div>
 
@@ -51,6 +54,18 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {isConnected ? (
+        <PendingReviewList tasks={tasks} creatorAddress={address ?? undefined} />
+      ) : isReady ? (
+        <PendingReviewList tasks={tasks} />
+      ) : null}
+
+      {pendingCount > 0 ? (
+        <p className="text-muted-foreground text-sm">
+          {pendingCount} task{pendingCount === 1 ? "" : "s"} need your review.
+        </p>
+      ) : null}
 
       <TaskList tasks={tasks} isLoading={isLoading} />
     </div>

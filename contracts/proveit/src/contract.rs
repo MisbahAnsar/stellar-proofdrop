@@ -1,7 +1,9 @@
 use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env};
 
 use crate::errors::ContractError;
-use crate::events::{ProofSubmittedEvent, TaskCreatedEvent};
+use crate::events::{
+    ProofSubmittedEvent, TaskApprovedEvent, TaskCreatedEvent, TaskRejectedEvent,
+};
 use crate::storage;
 use crate::types::{Task, TaskStatus};
 
@@ -46,6 +48,7 @@ impl ProveItContract {
             reward,
             proof_hash: storage::empty_proof_hash(&env),
             status: TaskStatus::Open,
+            worker: None,
         };
 
         storage::set_task(&env, &task);
@@ -82,12 +85,88 @@ impl ProveItContract {
 
         task.proof_hash = proof_hash.clone();
         task.status = TaskStatus::ProofSubmitted;
+        task.worker = Some(worker.clone());
         storage::set_task(&env, &task);
 
         ProofSubmittedEvent {
             task_id,
             worker: worker.clone(),
             proof_hash,
+        }
+        .publish(&env);
+
+        Ok(())
+    }
+
+    /// Creator approves proof and releases locked reward to the worker.
+    pub fn approve_task(env: Env, creator: Address, task_id: u64) -> Result<(), ContractError> {
+        Self::require_initialized(&env)?;
+        creator.require_auth();
+
+        let mut task = storage::get_task(&env, task_id).ok_or(ContractError::TaskNotFound)?;
+
+        if task.creator != creator {
+            return Err(ContractError::NotCreator);
+        }
+
+        if task.status != TaskStatus::ProofSubmitted {
+            return Err(ContractError::InvalidTaskStatus);
+        }
+
+        let worker = task
+            .worker
+            .clone()
+            .ok_or(ContractError::WorkerNotSet)?;
+
+        let token = storage::get_token(&env).ok_or(ContractError::NotInitialized)?;
+        let contract_address = env.current_contract_address();
+        let reward = task.reward;
+
+        token::Client::new(&env, &token).transfer(&contract_address, &worker, &reward);
+
+        task.status = TaskStatus::Approved;
+        storage::set_task(&env, &task);
+
+        TaskApprovedEvent {
+            task_id,
+            creator,
+            worker,
+            reward,
+        }
+        .publish(&env);
+
+        Ok(())
+    }
+
+    /// Creator rejects proof and returns the task to the open state for resubmission.
+    pub fn reject_task(env: Env, creator: Address, task_id: u64) -> Result<(), ContractError> {
+        Self::require_initialized(&env)?;
+        creator.require_auth();
+
+        let mut task = storage::get_task(&env, task_id).ok_or(ContractError::TaskNotFound)?;
+
+        if task.creator != creator {
+            return Err(ContractError::NotCreator);
+        }
+
+        if task.status != TaskStatus::ProofSubmitted {
+            return Err(ContractError::InvalidTaskStatus);
+        }
+
+        let worker = task
+            .worker
+            .clone()
+            .ok_or(ContractError::WorkerNotSet)?;
+
+        task.status = TaskStatus::Open;
+        task.proof_hash = storage::empty_proof_hash(&env);
+        task.worker = None;
+        storage::set_task(&env, &task);
+
+        TaskRejectedEvent {
+            task_id,
+            creator,
+            worker,
         }
         .publish(&env);
 

@@ -11,10 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CreatorReviewForm } from "@/features/tasks/components/creator-review-form";
 import { ProofPreview } from "@/features/tasks/components/proof-preview";
 import { ProofVerificationCard } from "@/features/tasks/components/proof-verification";
 import { SubmitProofForm } from "@/features/tasks/components/submit-proof-form";
 import { useProof, useTask } from "@/features/tasks/hooks/use-task";
+import { useReviewTask } from "@/features/tasks/hooks/use-review-task";
 import { useSubmitProof } from "@/features/tasks/hooks/use-submit-proof";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import { useWallet } from "@/hooks/use-wallet";
@@ -23,11 +25,36 @@ type TaskDetailProps = {
   taskId: string;
 };
 
+function formatStatus(status?: string) {
+  switch (status) {
+    case "proof_submitted":
+      return "proof submitted";
+    case "approved":
+      return "approved";
+    case "open":
+      return "open";
+    default:
+      return status ?? "open";
+  }
+}
+
 export function TaskDetail({ taskId }: TaskDetailProps) {
   const { address } = useWallet();
   const { data: task, isLoading } = useTask(taskId);
   const { data: proof } = useProof(taskId);
-  const { mutateAsync, isPending, flowState, resetFlow } = useSubmitProof();
+  const {
+    mutateAsync: submitProof,
+    isPending: isSubmitPending,
+    flowState: submitFlowState,
+    resetFlow: resetSubmitFlow,
+  } = useSubmitProof();
+  const {
+    approve,
+    reject,
+    isPending: isReviewPending,
+    flowState: reviewFlowState,
+    resetFlow: resetReviewFlow,
+  } = useReviewTask();
 
   if (isLoading) {
     return <p className="text-muted-foreground text-sm">Loading task…</p>;
@@ -73,7 +100,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
             </p>
             <p>
               <span className="text-muted-foreground">Status:</span>{" "}
-              {task.status ?? "open"}
+              {formatStatus(task.status)}
             </p>
             {task.deadline ? (
               <p>
@@ -90,28 +117,38 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
         </CardContent>
       </Card>
 
-      {!isCreator ? (
+      {isCreator ? (
+        <CreatorReviewForm
+          task={task}
+          flowState={reviewFlowState}
+          isPending={isReviewPending}
+          onResetFlow={resetReviewFlow}
+          onApprove={async () => {
+            if (!address) {
+              return;
+            }
+            await approve.mutateAsync({ taskId, creator: address });
+          }}
+          onReject={async () => {
+            if (!address) {
+              return;
+            }
+            await reject.mutateAsync({ taskId, creator: address });
+          }}
+        />
+      ) : (
         <SubmitProofForm
           task={task}
-          flowState={flowState}
-          isPending={isPending}
-          onResetFlow={resetFlow}
+          flowState={submitFlowState}
+          isPending={isSubmitPending}
+          onResetFlow={resetSubmitFlow}
           onSubmit={async (file) => {
             if (!address) {
               return;
             }
-
-            await mutateAsync({ taskId, file, worker: address });
+            await submitProof({ taskId, file, worker: address });
           }}
         />
-      ) : (
-        <Alert>
-          <AlertTitle>Creator view</AlertTitle>
-          <AlertDescription>
-            You created this task. Review the submitted proof and verify the
-            on-chain hash below.
-          </AlertDescription>
-        </Alert>
       )}
 
       {proof ? (

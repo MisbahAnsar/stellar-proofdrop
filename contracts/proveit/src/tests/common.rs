@@ -1,4 +1,4 @@
-use soroban_sdk::{testutils::Address as _, token, Address, Env};
+use soroban_sdk::{testutils::Address as _, token, Address, BytesN, Env};
 
 use crate::{ProveItContract, ProveItContractClient};
 
@@ -39,4 +39,13 @@ pub fn token_balance(ctx: &TestContext, address: &Address) -> i128 {
 
 pub fn contract_address(ctx: &TestContext) -> Address {
     ctx.client.address.clone()
+}
+
+pub fn sample_proof_hash(env: &soroban_sdk::Env) -> BytesN<32> {
+    BytesN::from_array(env, &[7u8; 32])
+}
+
+pub fn create_open_task(ctx: &TestContext, creator: &Address, reward: i128) -> u64 {
+    mint(ctx, creator, reward);
+    ctx.client.create_task(creator, &reward)
 }
