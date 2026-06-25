@@ -18,6 +18,7 @@ Creators fund tasks with XLM locked in a smart contract. Workers submit proof of
 | **Create task tx** (Task #2)  | [Stellar Expert](https://stellar.expert/explorer/testnet/tx/b03dbaa8987faf96404ed49412fdfe2f085f76a8344d069d49ece253af21e2e3) |
 | **Task detail** (after proof) | https://proofdrop-stellar.vercel.app/tasks/2                                                                                  |
 | **Contract**                  | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CAPVLSAV2KGCGYXGJOGRR5XXBL6BDOV5WOOM64NLNDHUNKHWUIBQEBLC)   |
+| **Demo video**                | [Google Drive](https://drive.google.com/file/d/1C0v0zbey_pvksO8ZFke4_O0LrMjO9RDN/view?usp=sharing)                            |
 
 Every on-chain action in the app links to Stellar Expert using this URL pattern:
 
