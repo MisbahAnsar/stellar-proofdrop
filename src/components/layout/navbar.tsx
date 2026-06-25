@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { WalletButton } from "@/components/wallet/wallet-controls";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -39,11 +40,7 @@ export function Navbar({ className }: NavbarProps) {
           </nav>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" disabled>
-            Connect Wallet
-          </Button>
-        </div>
+        <WalletButton />
       </div>
 
       <nav className="border-border flex gap-1 overflow-x-auto border-t px-4 py-2 md:hidden">

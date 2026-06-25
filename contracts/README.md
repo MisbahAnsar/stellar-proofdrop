@@ -26,13 +26,13 @@ contracts/
 
 ## Implemented
 
-| Capability | Description |
-| --- | --- |
-| `initialize` | Registers the reward token contract (XLM SAC) |
-| `create_task` | Locks reward funds, stores task state, emits `TaskCreated` |
-| `get_task` | Reads a task by ID |
-| `get_task_count` | Returns total tasks created |
-| `get_token` | Returns configured token address |
+| Capability       | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| `initialize`     | Registers the reward token contract (XLM SAC)              |
+| `create_task`    | Locks reward funds, stores task state, emits `TaskCreated` |
+| `get_task`       | Reads a task by ID                                         |
+| `get_task_count` | Returns total tasks created                                |
+| `get_token`      | Returns configured token address                           |
 
 ### Task state
 

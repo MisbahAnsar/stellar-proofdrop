@@ -7,7 +7,9 @@ Users create small paid tasks, lock XLM in a smart contract, and release payment
 ## Stack
 
 - **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui
-- **Data:** TanStack React Query v5, Zod
+- **Wallet:** Freighter (`@stellar/freighter-api`)
+- **Stellar:** `@stellar/stellar-sdk` (Soroban RPC)
+- **Data:** TanStack React Query v5, React Hook Form, Zod
 - **Contracts:** Rust, Soroban SDK 25
 - **Package manager:** Bun
 
@@ -18,17 +20,20 @@ contracts/                  # Soroban smart contracts (Rust)
 └── proveit/                # Task escrow contract
 
 src/
-├── app/                    # Next.js routes and global styles
+├── app/                    # Next.js routes
 ├── components/
 │   ├── layout/             # App shell, navbar
-│   └── ui/                 # shadcn/ui primitives
-├── config/                 # App-wide configuration
-├── contracts/              # Generated TS bindings (future)
-├── features/               # Domain feature modules (future)
+│   ├── ui/                 # shadcn/ui primitives
+│   └── wallet/             # Wallet connect / status UI
+├── config/                 # Site and Stellar network config
+├── features/tasks/           # Create task form, schema, hooks
 ├── hooks/                  # Shared React hooks
-├── lib/                    # Utilities, env validation
-├── providers/              # React context providers
-├── services/               # Stellar / Soroban clients (future)
+├── lib/                    # Utilities, env validation, Stellar helpers
+├── providers/              # React Query, wallet context
+├── services/
+│   ├── stellar/            # Soroban transaction helpers
+│   ├── tasks/              # Off-chain task metadata store
+│   └── wallet/             # Freighter integration
 └── types/                  # Shared TypeScript types
 ```
 
@@ -39,7 +44,8 @@ See [contracts/README.md](contracts/README.md) for contract architecture details
 ### Prerequisites
 
 - [Bun](https://bun.sh) (recommended) or Node.js 20+
-- Rust 1.84+ and `wasm32v1-none` target
+- [Freighter](https://www.freighter.app/) browser extension
+- Rust 1.84+ and `wasm32v1-none` target (for contracts)
 
 ```bash
 rustup target add wasm32v1-none
@@ -59,11 +65,12 @@ Copy the example file and adjust as needed:
 cp .env.example .env.local
 ```
 
-| Variable                      | Description                              | Default                 |
-| ----------------------------- | ---------------------------------------- | ----------------------- |
-| `NEXT_PUBLIC_APP_URL`         | Public app URL                           | `http://localhost:3000` |
-| `NEXT_PUBLIC_STELLAR_NETWORK` | Stellar network (`testnet` \| `mainnet`) | `testnet`               |
-| `NEXT_PUBLIC_SOROBAN_RPC_URL` | Soroban RPC endpoint (optional)          | —                       |
+| Variable                          | Description                              | Default                 |
+| --------------------------------- | ---------------------------------------- | ----------------------- |
+| `NEXT_PUBLIC_APP_URL`             | Public app URL                           | `http://localhost:3000` |
+| `NEXT_PUBLIC_STELLAR_NETWORK`     | Stellar network (`testnet` \| `mainnet`) | `testnet`               |
+| `NEXT_PUBLIC_SOROBAN_RPC_URL`     | Soroban RPC endpoint (optional)          | network default         |
+| `NEXT_PUBLIC_PROVEIT_CONTRACT_ID` | Deployed ProveIt contract ID             | —                       |
 
 Environment variables are validated at runtime via `src/lib/env.ts`.
 
@@ -74,6 +81,26 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Frontend features
+
+### Wallet
+
+- Connect / disconnect via Freighter
+- Wallet status in navbar (truncated address + network)
+- Session hydration on page load
+
+### Create Task (`/create`)
+
+- Zod-validated form: title, description, reward (XLM), optional deadline
+- On-chain `create_task` invocation with fund locking
+- Off-chain metadata stored in `localStorage` (title, description, deadline)
+- Loading and error states throughout
+
+### Dashboard (`/dashboard`)
+
+- Wallet status overview
+- Locally stored tasks from this browser
 
 ## Scripts
 
@@ -94,22 +121,22 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Run from the `contracts/` directory:
 
-| Command                                              | Description                |
-| ---------------------------------------------------- | -------------------------- |
-| `cargo test`                                         | Run contract unit tests    |
+| Command                                        | Description             |
+| ---------------------------------------------- | ----------------------- |
+| `cargo test`                                   | Run contract unit tests |
 | `cargo build --target wasm32v1-none --release` | Build optimized WASM    |
 
 ## Soroban contract
 
 The `proveit` contract supports task creation with on-chain fund locking.
 
-| Function       | Description                                      |
-| -------------- | ------------------------------------------------ |
-| `initialize`   | Configure the reward token (XLM SAC)             |
-| `create_task`  | Lock funds, store task, emit `TaskCreated` event |
-| `get_task`     | Read task by ID                                  |
-| `get_task_count` | Total tasks created                            |
-| `get_token`    | Configured token address                         |
+| Function         | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| `initialize`     | Configure the reward token (XLM SAC)             |
+| `create_task`    | Lock funds, store task, emit `TaskCreated` event |
+| `get_task`       | Read task by ID                                  |
+| `get_task_count` | Total tasks created                              |
+| `get_token`      | Configured token address                         |
 
 Each task stores `creator`, `reward`, `proof_hash` (placeholder), and `status`. Twelve unit tests cover initialization, validation, fund locking, events, and error paths.
 
@@ -126,16 +153,6 @@ Each task stores `creator`, `reward`, `proof_hash` (placeholder), and `status`. 
 - Initialized with `components.json`
 - Add components: `bunx shadcn@latest add <component>`
 
-### ESLint
-
-- `eslint-config-next` (core-web-vitals + TypeScript)
-- `eslint-config-prettier` to avoid rule conflicts
-
-### Prettier
-
-- `prettier-plugin-tailwindcss` for class sorting
-- Config: `.prettierrc`
-
 ## UI conventions
 
 - **Light theme only** — no dark mode
@@ -149,14 +166,16 @@ Each task stores `creator`, `reward`, `proof_hash` (placeholder), and `status`. 
 - [x] Soroban contract architecture (`contracts/proveit`)
 - [x] Task creation with fund locking and events
 - [x] Contract unit tests (12 passing)
+- [x] Freighter wallet connect / disconnect / status
+- [x] Create Task page with Zod validation
+- [x] Dashboard with local task metadata
 
 ## Next steps
 
-- Wallet connection (Freighter / compatible wallets)
 - Proof submission and approval handlers
 - Payment release on approval
-- TypeScript contract bindings and frontend integration
-- Off-chain proof storage integration
+- Backend for off-chain task metadata
+- TypeScript contract bindings
 
 ## License
 

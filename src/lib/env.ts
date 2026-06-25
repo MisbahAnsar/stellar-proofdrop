@@ -6,6 +6,7 @@ const envSchema = z.object({
     .enum(["testnet", "mainnet"])
     .default("testnet"),
   NEXT_PUBLIC_SOROBAN_RPC_URL: z.url().optional(),
+  NEXT_PUBLIC_PROVEIT_CONTRACT_ID: z.string().trim().min(1).optional(),
 });
 
 function createEnv() {
@@ -13,6 +14,8 @@ function createEnv() {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_STELLAR_NETWORK: process.env.NEXT_PUBLIC_STELLAR_NETWORK,
     NEXT_PUBLIC_SOROBAN_RPC_URL: process.env.NEXT_PUBLIC_SOROBAN_RPC_URL,
+    NEXT_PUBLIC_PROVEIT_CONTRACT_ID:
+      process.env.NEXT_PUBLIC_PROVEIT_CONTRACT_ID,
   });
 
   if (!parsed.success) {
