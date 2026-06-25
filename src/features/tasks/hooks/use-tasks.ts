@@ -27,9 +27,14 @@ export function useTaskListSync() {
       void queryClient.invalidateQueries({ queryKey: taskKeys.all });
     });
 
+    const unsubscribeUpdated = taskEventBus.onTaskUpdated(() => {
+      void queryClient.invalidateQueries({ queryKey: taskKeys.all });
+    });
+
     return () => {
       unsubscribeRefresh();
       unsubscribeCreated();
+      unsubscribeUpdated();
     };
   }, [queryClient]);
 }

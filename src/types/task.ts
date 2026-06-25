@@ -1,3 +1,5 @@
+export type TaskStatus = "open" | "proof_submitted" | "approved" | "rejected";
+
 export type TaskMetadata = {
   taskId: string;
   title: string;
@@ -8,6 +10,11 @@ export type TaskMetadata = {
   transactionHash: string;
   createdAt: string;
   ledger?: number;
+  status?: TaskStatus;
+  proofHash?: string;
+  proofSubmittedBy?: string;
+  proofSubmittedAt?: string;
+  proofTransactionHash?: string;
 };
 
 export type TaskCreatedChainEvent = {

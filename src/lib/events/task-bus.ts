@@ -2,11 +2,16 @@ import type { TaskCreatedChainEvent, TaskMetadata } from "@/types/task";
 
 export const TASK_EVENTS = {
   created: "proveit:task-created",
+  updated: "proveit:task-updated",
   refresh: "proveit:tasks-refresh",
   chainEvent: "proveit:chain-event",
 } as const;
 
 type TaskCreatedDetail = {
+  task: TaskMetadata;
+};
+
+type TaskUpdatedDetail = {
   task: TaskMetadata;
 };
 
@@ -18,6 +23,15 @@ class TaskEventBus extends EventTarget {
   emitTaskCreated(task: TaskMetadata) {
     this.dispatchEvent(
       new CustomEvent<TaskCreatedDetail>(TASK_EVENTS.created, {
+        detail: { task },
+      }),
+    );
+    this.emitRefresh();
+  }
+
+  emitTaskUpdated(task: TaskMetadata) {
+    this.dispatchEvent(
+      new CustomEvent<TaskUpdatedDetail>(TASK_EVENTS.updated, {
         detail: { task },
       }),
     );
@@ -45,6 +59,16 @@ class TaskEventBus extends EventTarget {
 
     this.addEventListener(TASK_EVENTS.created, listener);
     return () => this.removeEventListener(TASK_EVENTS.created, listener);
+  }
+
+  onTaskUpdated(handler: (task: TaskMetadata) => void) {
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<TaskUpdatedDetail>).detail;
+      handler(detail.task);
+    };
+
+    this.addEventListener(TASK_EVENTS.updated, listener);
+    return () => this.removeEventListener(TASK_EVENTS.updated, listener);
   }
 
   onRefresh(handler: () => void) {

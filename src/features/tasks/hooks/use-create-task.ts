@@ -69,6 +69,7 @@ export function useCreateTask() {
           transactionHash,
           createdAt: new Date().toISOString(),
           ledger,
+          status: "open" as const,
         };
 
         saveTaskMetadata(metadata);

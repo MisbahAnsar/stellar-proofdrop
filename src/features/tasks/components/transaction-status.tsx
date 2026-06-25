@@ -1,12 +1,22 @@
 import { Loader2 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { CreateTaskFlowState } from "@/features/tasks/hooks/use-create-task";
 import { TRANSACTION_MESSAGES } from "@/services/stellar/transaction-types";
+import type { TransactionPhase } from "@/services/stellar/transaction-types";
 import { cn } from "@/lib/utils";
 
+export type TransactionFlowState =
+  | { status: "idle" }
+  | { status: "pending"; phase: TransactionPhase }
+  | {
+      status: "success";
+      title: string;
+      description: string;
+    }
+  | { status: "error"; message: string };
+
 type TransactionStatusProps = {
-  flowState: CreateTaskFlowState;
+  flowState: TransactionFlowState;
   className?: string;
 };
 
@@ -33,12 +43,8 @@ export function TransactionStatus({
   if (flowState.status === "success") {
     return (
       <Alert className={cn("border-border", className)}>
-        <AlertTitle>Task created successfully</AlertTitle>
-        <AlertDescription>
-          Task #{flowState.taskId} is live on-chain. Transaction{" "}
-          <span className="font-mono">{flowState.transactionHash}</span>{" "}
-          confirmed.
-        </AlertDescription>
+        <AlertTitle>{flowState.title}</AlertTitle>
+        <AlertDescription>{flowState.description}</AlertDescription>
       </Alert>
     );
   }

@@ -60,12 +60,22 @@ export function TaskList({
       <CardContent className="p-0">
         <ul className="divide-border divide-y">
           {tasks.map((task) => (
-            <li key={task.taskId} className="space-y-1 p-4">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-foreground font-medium">{task.title}</p>
-                <p className="text-muted-foreground text-sm">
-                  {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
-                </p>
+            <li key={task.taskId} className="space-y-2 p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <Link
+                  href={`/tasks/${task.taskId}`}
+                  className="text-foreground font-medium hover:underline"
+                >
+                  {task.title}
+                </Link>
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground rounded border border-border px-2 py-0.5 text-xs">
+                    {task.status ?? "open"}
+                  </span>
+                  <p className="text-muted-foreground text-sm">
+                    {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
+                  </p>
+                </div>
               </div>
               <p className="text-muted-foreground line-clamp-2 text-sm">
                 {task.description}

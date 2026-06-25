@@ -120,7 +120,17 @@ export function CreateTaskForm() {
               </Alert>
             ) : null}
 
-            <TransactionStatus flowState={flowState} />
+            <TransactionStatus
+              flowState={
+                flowState.status === "success"
+                  ? {
+                      status: "success",
+                      title: "Task created successfully",
+                      description: `Task #${flowState.taskId} is live on-chain. Transaction ${flowState.transactionHash} confirmed.`,
+                    }
+                  : flowState
+              }
+            />
 
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>

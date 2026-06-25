@@ -9,4 +9,6 @@ pub enum ContractError {
     InvalidAmount = 3,
     TaskNotFound = 4,
     InsufficientBalance = 5,
+    InvalidProofHash = 6,
+    InvalidTaskStatus = 7,
 }

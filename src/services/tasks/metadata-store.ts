@@ -42,3 +42,20 @@ export function getTaskMetadataList(): TaskMetadata[] {
 export function getTaskMetadata(taskId: string): TaskMetadata | undefined {
   return readAll().find((item) => item.taskId === taskId);
 }
+
+export function updateTaskMetadata(
+  taskId: string,
+  patch: Partial<TaskMetadata>,
+): TaskMetadata | undefined {
+  const existing = readAll();
+  const index = existing.findIndex((item) => item.taskId === taskId);
+  if (index === -1) {
+    return undefined;
+  }
+
+  const updated = { ...existing[index], ...patch };
+  const next = [...existing];
+  next[index] = updated;
+  writeAll(next);
+  return updated;
+}

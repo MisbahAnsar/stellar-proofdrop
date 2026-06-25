@@ -50,3 +50,7 @@ pub fn set_task(env: &Env, task: &Task) {
 pub fn empty_proof_hash(env: &Env) -> soroban_sdk::BytesN<32> {
     soroban_sdk::BytesN::from_array(env, &[0u8; 32])
 }
+
+pub fn is_empty_proof_hash(hash: &soroban_sdk::BytesN<32>) -> bool {
+    hash.to_array() == [0u8; 32]
+}

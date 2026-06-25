@@ -1,8 +1,10 @@
 import { scValToNative, xdr } from "@stellar/stellar-sdk";
 
+import type { ProofSubmittedChainEvent } from "@/types/proof";
 import type { TaskCreatedChainEvent } from "@/types/task";
 
 const TASK_CREATED_TOPICS = ["task", "created"];
+const PROOF_SUBMITTED_TOPICS = ["task", "proof_submitted"];
 
 function topicToString(topic: xdr.ScVal): string | null {
   switch (topic.switch()) {
@@ -13,21 +15,17 @@ function topicToString(topic: xdr.ScVal): string | null {
   }
 }
 
-function matchesTaskCreatedTopics(topics: xdr.ScVal[]): boolean {
-  if (topics.length < TASK_CREATED_TOPICS.length) {
+function matchesTopics(topics: xdr.ScVal[], expected: string[]): boolean {
+  if (topics.length < expected.length) {
     return false;
   }
 
-  return TASK_CREATED_TOPICS.every((expected, index) => {
-    return topicToString(topics[index]) === expected;
+  return expected.every((topic, index) => {
+    return topicToString(topics[index]) === topic;
   });
 }
 
-function parseEventValue(value: xdr.ScVal): {
-  taskId: string;
-  creator: string;
-  rewardStroops: string;
-} | null {
+function parseMapFields(value: xdr.ScVal): Record<string, unknown> | null {
   if (value.switch() !== xdr.ScValType.scvMap()) {
     return null;
   }
@@ -44,6 +42,45 @@ function parseEventValue(value: xdr.ScVal): {
     fields[key] = scValToNative(entry.val());
   }
 
+  return fields;
+}
+
+function normalizeAddress(value: unknown): string | null {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (value && typeof value === "object" && "toString" in value) {
+    return String(value);
+  }
+
+  return null;
+}
+
+function normalizeHash(value: unknown): string | null {
+  if (value instanceof Uint8Array) {
+    return Array.from(value)
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  if (Buffer.isBuffer(value)) {
+    return value.toString("hex");
+  }
+
+  return null;
+}
+
+function parseTaskCreatedValue(value: xdr.ScVal): {
+  taskId: string;
+  creator: string;
+  rewardStroops: string;
+} | null {
+  const fields = parseMapFields(value);
+  if (!fields) {
+    return null;
+  }
+
   if (
     typeof fields.task_id !== "bigint" &&
     typeof fields.task_id !== "number"
@@ -51,19 +88,8 @@ function parseEventValue(value: xdr.ScVal): {
     return null;
   }
 
-  if (typeof fields.creator !== "string") {
-    if (
-      fields.creator &&
-      typeof fields.creator === "object" &&
-      "toString" in fields.creator
-    ) {
-      fields.creator = String(fields.creator);
-    } else {
-      return null;
-    }
-  }
-
-  if (typeof fields.creator !== "string") {
+  const creator = normalizeAddress(fields.creator);
+  if (!creator) {
     return null;
   }
 
@@ -73,17 +99,50 @@ function parseEventValue(value: xdr.ScVal): {
 
   return {
     taskId: fields.task_id.toString(),
-    creator: fields.creator,
+    creator,
     rewardStroops: fields.reward.toString(),
   };
 }
 
-export function parseTaskCreatedEvents(
+function parseProofSubmittedValue(value: xdr.ScVal): {
+  taskId: string;
+  worker: string;
+  proofHashHex: string;
+} | null {
+  const fields = parseMapFields(value);
+  if (!fields) {
+    return null;
+  }
+
+  if (
+    typeof fields.task_id !== "bigint" &&
+    typeof fields.task_id !== "number"
+  ) {
+    return null;
+  }
+
+  const worker = normalizeAddress(fields.worker);
+  const proofHashHex = normalizeHash(fields.proof_hash);
+  if (!worker || !proofHashHex) {
+    return null;
+  }
+
+  return {
+    taskId: fields.task_id.toString(),
+    worker,
+    proofHashHex,
+  };
+}
+
+function parseContractEvents<TBase>(
   events: xdr.ContractEvent[],
+  topics: string[],
+  parser: (value: xdr.ScVal) => TBase | null,
   transactionHash: string,
   ledger: number,
-): TaskCreatedChainEvent[] {
-  const parsed: TaskCreatedChainEvent[] = [];
+): Array<TBase & { transactionHash: string; ledger: number }> {
+  const parsed: Array<TBase & { transactionHash: string; ledger: number }> =
+    [];
 
   for (const event of events) {
     if (event.type().name !== "contract") {
@@ -96,11 +155,11 @@ export function parseTaskCreatedEvents(
     }
 
     const v0 = body.v0();
-    if (!matchesTaskCreatedTopics(v0.topics())) {
+    if (!matchesTopics(v0.topics(), topics)) {
       continue;
     }
 
-    const data = parseEventValue(v0.data());
+    const data = parser(v0.data());
     if (!data) {
       continue;
     }
@@ -113,6 +172,34 @@ export function parseTaskCreatedEvents(
   }
 
   return parsed;
+}
+
+export function parseTaskCreatedEvents(
+  events: xdr.ContractEvent[],
+  transactionHash: string,
+  ledger: number,
+): TaskCreatedChainEvent[] {
+  return parseContractEvents(
+    events,
+    TASK_CREATED_TOPICS,
+    parseTaskCreatedValue,
+    transactionHash,
+    ledger,
+  );
+}
+
+export function parseProofSubmittedEvents(
+  events: xdr.ContractEvent[],
+  transactionHash: string,
+  ledger: number,
+): ProofSubmittedChainEvent[] {
+  return parseContractEvents(
+    events,
+    PROOF_SUBMITTED_TOPICS,
+    parseProofSubmittedValue,
+    transactionHash,
+    ledger,
+  );
 }
 
 export async function fetchTaskCreatedEvents(params: {
@@ -140,7 +227,7 @@ export async function fetchTaskCreatedEvents(params: {
       (event) => event.type === "contract" && event.inSuccessfulContractCall,
     )
     .map((event) => {
-      const data = parseEventValue(event.value);
+      const data = parseTaskCreatedValue(event.value);
       if (!data) {
         return null;
       }

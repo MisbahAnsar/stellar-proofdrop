@@ -1,7 +1,7 @@
-use soroban_sdk::{contract, contractimpl, token, Address, Env};
+use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env};
 
 use crate::errors::ContractError;
-use crate::events::TaskCreatedEvent;
+use crate::events::{ProofSubmittedEvent, TaskCreatedEvent};
 use crate::storage;
 use crate::types::{Task, TaskStatus};
 
@@ -58,6 +58,40 @@ impl ProveItContract {
         .publish(&env);
 
         Ok(task_id)
+    }
+
+    /// Stores a proof hash on-chain. Proof content remains off-chain.
+    pub fn submit_proof(
+        env: Env,
+        worker: Address,
+        task_id: u64,
+        proof_hash: BytesN<32>,
+    ) -> Result<(), ContractError> {
+        Self::require_initialized(&env)?;
+        worker.require_auth();
+
+        if storage::is_empty_proof_hash(&proof_hash) {
+            return Err(ContractError::InvalidProofHash);
+        }
+
+        let mut task = storage::get_task(&env, task_id).ok_or(ContractError::TaskNotFound)?;
+
+        if task.status != TaskStatus::Open {
+            return Err(ContractError::InvalidTaskStatus);
+        }
+
+        task.proof_hash = proof_hash.clone();
+        task.status = TaskStatus::ProofSubmitted;
+        storage::set_task(&env, &task);
+
+        ProofSubmittedEvent {
+            task_id,
+            worker: worker.clone(),
+            proof_hash,
+        }
+        .publish(&env);
+
+        Ok(())
     }
 
     pub fn get_task(env: Env, task_id: u64) -> Result<Task, ContractError> {
