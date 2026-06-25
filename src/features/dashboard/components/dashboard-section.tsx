@@ -35,7 +35,7 @@ export function DashboardSection({
   actionLabel,
 }: DashboardSectionProps) {
   return (
-    <Card className="border-border h-full ring-0">
+    <Card className="surface-card h-full">
       <CardHeader className="border-border border-b py-4">
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>

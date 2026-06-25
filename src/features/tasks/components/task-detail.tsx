@@ -20,7 +20,8 @@ import { SubmitProofForm } from "@/features/tasks/components/submit-proof-form";
 import { useProof, useTask } from "@/features/tasks/hooks/use-task";
 import { useReviewTask } from "@/features/tasks/hooks/use-review-task";
 import { useSubmitProof } from "@/features/tasks/hooks/use-submit-proof";
-import { formatTaskStatus } from "@/lib/tasks/status";
+import { TransactionExplorerLink } from "@/components/stellar/transaction-explorer-link";
+import { TaskStatusBadge } from "@/components/ui/task-status-badge";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import { useWallet } from "@/hooks/use-wallet";
 
@@ -85,28 +86,54 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
     <div className="space-y-6">
       <PageHeader title={task.title} description={`Task #${task.taskId}`} />
 
-      <Card className="border-border ring-0">
+      <Card className="surface-card">
         <CardHeader className="border-border border-b">
           <CardTitle className="text-base">Details</CardTitle>
-          <CardDescription>{formatTaskStatus(task.status)}</CardDescription>
+          <CardDescription>
+            <TaskStatusBadge status={task.status} />
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 pt-6">
-          <p className="text-muted-foreground text-sm">{task.description}</p>
-          <dl className="grid gap-2 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground">Reward</dt>
-              <dd>{formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM</dd>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {task.description}
+          </p>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <div className="bg-muted/40 rounded-lg border p-3">
+              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Reward
+              </dt>
+              <dd className="text-primary mt-1 text-lg font-semibold">
+                {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
+              </dd>
             </div>
             {task.deadline ? (
-              <div>
-                <dt className="text-muted-foreground">Deadline</dt>
-                <dd>{new Date(task.deadline).toLocaleString()}</dd>
+              <div className="bg-muted/40 rounded-lg border p-3">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                  Deadline
+                </dt>
+                <dd className="mt-1 font-medium">
+                  {new Date(task.deadline).toLocaleString()}
+                </dd>
+              </div>
+            ) : null}
+            {task.transactionHash ? (
+              <div className="bg-muted/40 rounded-lg border p-3 sm:col-span-2">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                  Creation transaction
+                </dt>
+                <dd className="mt-2">
+                  <TransactionExplorerLink
+                    transactionHash={task.transactionHash}
+                  />
+                </dd>
               </div>
             ) : null}
             {task.proofHash ? (
-              <div className="sm:col-span-2">
-                <dt className="text-muted-foreground">On-chain hash</dt>
-                <dd className="font-mono text-xs break-all">
+              <div className="bg-muted/40 rounded-lg border p-3 sm:col-span-2">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                  On-chain hash
+                </dt>
+                <dd className="mt-1 font-mono text-xs break-all">
                   {task.proofHash}
                 </dd>
               </div>
@@ -150,7 +177,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
       )}
 
       {proof ? (
-        <Card className="border-border ring-0">
+        <Card className="surface-card">
           <CardHeader className="border-border border-b">
             <CardTitle className="text-base">Proof preview</CardTitle>
             <CardDescription>

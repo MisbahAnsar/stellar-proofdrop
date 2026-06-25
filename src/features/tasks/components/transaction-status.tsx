@@ -1,6 +1,9 @@
-import { Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import Link from "next/link";
 
+import { TransactionExplorerLink } from "@/components/stellar/transaction-explorer-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { TRANSACTION_MESSAGES } from "@/services/stellar/transaction-types";
 import type { TransactionPhase } from "@/services/stellar/transaction-types";
 import { cn } from "@/lib/utils";
@@ -11,7 +14,9 @@ export type TransactionFlowState =
   | {
       status: "success";
       title: string;
-      description: string;
+      description?: string;
+      transactionHash?: string;
+      taskId?: string;
     }
   | { status: "error"; message: string };
 
@@ -31,7 +36,8 @@ export function TransactionStatus({
   if (flowState.status === "pending") {
     return (
       <Alert
-        className={cn("border-border", className)}
+        variant="pending"
+        className={cn(className)}
         role="status"
         aria-live="polite"
       >
@@ -46,15 +52,36 @@ export function TransactionStatus({
 
   if (flowState.status === "success") {
     return (
-      <Alert className={cn("border-border", className)}>
+      <Alert variant="success" className={cn(className)}>
+        <CheckCircle2 className="size-4" />
         <AlertTitle>{flowState.title}</AlertTitle>
-        <AlertDescription>{flowState.description}</AlertDescription>
+        <AlertDescription className="space-y-3">
+          {flowState.description ? <p>{flowState.description}</p> : null}
+          {flowState.transactionHash ? (
+            <TransactionExplorerLink
+              transactionHash={flowState.transactionHash}
+            />
+          ) : null}
+          {flowState.taskId ? (
+            <div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-background/80"
+                render={<Link href={`/tasks/${flowState.taskId}`} />}
+              >
+                Open task #{flowState.taskId}
+              </Button>
+            </div>
+          ) : null}
+        </AlertDescription>
       </Alert>
     );
   }
 
   return (
     <Alert variant="destructive" className={className}>
+      <XCircle className="size-4" />
       <AlertTitle>Transaction failed</AlertTitle>
       <AlertDescription>{flowState.message}</AlertDescription>
     </Alert>

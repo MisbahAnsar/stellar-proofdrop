@@ -3,7 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 
-import { formatTaskStatus } from "@/lib/tasks/status";
+import { TaskStatusBadge } from "@/components/ui/task-status-badge";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import type { TaskMetadata } from "@/types/task";
 
@@ -24,9 +24,7 @@ export const DashboardTaskRow = memo(function DashboardTaskRow({
           {task.title}
         </Link>
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground border-border rounded border px-2 py-0.5 text-xs">
-            {formatTaskStatus(task.status)}
-          </span>
+          <TaskStatusBadge status={task.status} />
           <span className="text-muted-foreground text-xs">
             {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
           </span>

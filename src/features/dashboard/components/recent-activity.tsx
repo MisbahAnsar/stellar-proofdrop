@@ -45,7 +45,7 @@ export function RecentActivity({
   isLoading = false,
 }: RecentActivityProps) {
   return (
-    <Card className="border-border ring-0">
+    <Card className="surface-card">
       <CardHeader className="border-border border-b py-4">
         <CardTitle className="text-base">Recent activity</CardTitle>
         <CardDescription>

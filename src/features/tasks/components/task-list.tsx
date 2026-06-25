@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatTaskStatus } from "@/lib/tasks/status";
+import { TaskStatusBadge } from "@/components/ui/task-status-badge";
 import { formatXlm, stroopsToXlm } from "@/lib/stellar/amount";
 import type { TaskMetadata } from "@/types/task";
 
@@ -31,7 +31,7 @@ export function TaskList({
 }: TaskListProps) {
   if (isLoading) {
     return (
-      <Card className="border-border ring-0">
+      <Card className="surface-card">
         <CardHeader className="border-border border-b">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
@@ -57,7 +57,7 @@ export function TaskList({
   }
 
   return (
-    <Card className="border-border ring-0">
+    <Card className="surface-card">
       <CardHeader className="border-border border-b">
         <CardTitle>{title}</CardTitle>
         <CardDescription>
@@ -67,7 +67,10 @@ export function TaskList({
       <CardContent className="p-0">
         <ul className="divide-border divide-y" aria-label={title}>
           {tasks.map((task) => (
-            <li key={task.taskId} className="space-y-2 p-4">
+            <li
+              key={task.taskId}
+              className="hover:bg-muted/40 space-y-2 p-4 transition-colors"
+            >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href={`/tasks/${task.taskId}`}
@@ -76,9 +79,7 @@ export function TaskList({
                   {task.title}
                 </Link>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-muted-foreground border-border rounded border px-2 py-0.5 text-xs">
-                    {formatTaskStatus(task.status)}
-                  </span>
+                  <TaskStatusBadge status={task.status} />
                   <span className="text-muted-foreground text-sm">
                     {formatXlm(stroopsToXlm(BigInt(task.rewardStroops)))} XLM
                   </span>

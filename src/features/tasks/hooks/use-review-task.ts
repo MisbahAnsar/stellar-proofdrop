@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { getProofdropContractId } from "@/config/stellar";
 import { taskKeys } from "@/features/tasks/query-keys";
 import { taskEventBus } from "@/lib/events/task-bus";
+import { getStellarExpertTxUrl } from "@/lib/stellar/explorer";
 import { ContractError, getErrorMessage } from "@/lib/stellar/errors";
 import { approveTaskOnChain } from "@/services/stellar/approve-task";
 import { rejectTaskOnChain } from "@/services/stellar/reject-task";
@@ -85,7 +86,17 @@ export function useReviewTask() {
 
         toast.success(`Task #${taskId} approved`, {
           id: toastId,
-          description: `Payment released. Transaction ${transactionHash.slice(0, 8)}…`,
+          description: "Payment released on-chain.",
+          action: {
+            label: "View transaction",
+            onClick: () => {
+              window.open(
+                getStellarExpertTxUrl(transactionHash),
+                "_blank",
+                "noopener,noreferrer",
+              );
+            },
+          },
         });
 
         setFlowState({
@@ -158,7 +169,17 @@ export function useReviewTask() {
 
         toast.success(`Task #${taskId} reopened`, {
           id: toastId,
-          description: `Proof rejected. Task is open for resubmission.`,
+          description: "Proof rejected. Task is open for resubmission.",
+          action: {
+            label: "View transaction",
+            onClick: () => {
+              window.open(
+                getStellarExpertTxUrl(transactionHash),
+                "_blank",
+                "noopener,noreferrer",
+              );
+            },
+          },
         });
 
         setFlowState({

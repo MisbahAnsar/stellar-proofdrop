@@ -18,16 +18,19 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
+        "surface-panel flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6",
         className,
       )}
     >
       <div className="space-y-2">
-        <h1 className="text-foreground text-2xl font-semibold tracking-tight">
+        <p className="text-primary text-xs font-semibold tracking-[0.18em] uppercase">
+          Stellar Soroban
+        </p>
+        <h1 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
           {title}
         </h1>
         {description ? (
-          <p className="text-muted-foreground max-w-2xl text-sm">
+          <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
             {description}
           </p>
         ) : null}

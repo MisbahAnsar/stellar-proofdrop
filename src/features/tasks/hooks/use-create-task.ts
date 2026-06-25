@@ -8,6 +8,7 @@ import { getProofdropContractId } from "@/config/stellar";
 import { taskKeys } from "@/features/tasks/query-keys";
 import type { CreateTaskFormValues } from "@/features/tasks/schemas/create-task";
 import { taskEventBus } from "@/lib/events/task-bus";
+import { getStellarExpertTxUrl } from "@/lib/stellar/explorer";
 import { xlmToStroops } from "@/lib/stellar/amount";
 import { ContractError, getErrorMessage } from "@/lib/stellar/errors";
 import { createTaskOnChain } from "@/services/stellar/create-task";
@@ -77,7 +78,17 @@ export function useCreateTask() {
 
         toast.success(`Task #${taskId} created on-chain`, {
           id: toastId,
-          description: `Transaction ${transactionHash.slice(0, 8)}… confirmed`,
+          description: "Confirmed on Stellar testnet.",
+          action: {
+            label: "View transaction",
+            onClick: () => {
+              window.open(
+                getStellarExpertTxUrl(transactionHash),
+                "_blank",
+                "noopener,noreferrer",
+              );
+            },
+          },
         });
 
         setFlowState({

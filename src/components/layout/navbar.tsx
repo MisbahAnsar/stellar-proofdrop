@@ -49,7 +49,7 @@ export function Navbar({ className }: NavbarProps) {
   return (
     <header
       className={cn(
-        "border-border bg-background sticky top-0 z-50 border-b",
+        "border-border/80 bg-card/85 sticky top-0 z-50 border-b shadow-sm backdrop-blur-md",
         className,
       )}
     >
@@ -57,7 +57,7 @@ export function Navbar({ className }: NavbarProps) {
         <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Link
             href="/"
-            className="text-foreground focus-visible:ring-ring shrink-0 rounded-sm text-sm font-semibold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
+            className="text-primary focus-visible:ring-ring shrink-0 rounded-sm text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
           >
             {siteConfig.name}
           </Link>

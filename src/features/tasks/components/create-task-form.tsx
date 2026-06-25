@@ -67,7 +67,7 @@ export function CreateTaskForm() {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <Card className="border-border w-full max-w-2xl ring-0">
+      <Card className="surface-card w-full max-w-2xl">
         <CardHeader className="border-border border-b">
           <CardTitle className="text-base" role="heading" aria-level={2}>
             Task details
@@ -130,7 +130,9 @@ export function CreateTaskForm() {
                   ? {
                       status: "success",
                       title: "Task created successfully",
-                      description: `Task #${flowState.taskId} is live on-chain. Transaction ${flowState.transactionHash} confirmed.`,
+                      description: `Task #${flowState.taskId} is live on-chain.`,
+                      transactionHash: flowState.transactionHash,
+                      taskId: flowState.taskId,
                     }
                   : flowState
               }

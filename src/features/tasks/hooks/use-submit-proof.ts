@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { getProofdropContractId } from "@/config/stellar";
 import { proofKeys, taskKeys } from "@/features/tasks/query-keys";
 import { taskEventBus } from "@/lib/events/task-bus";
+import { getStellarExpertTxUrl } from "@/lib/stellar/explorer";
 import { sha256HexFromFile } from "@/lib/proof/hash";
 import { ContractError, getErrorMessage } from "@/lib/stellar/errors";
 import { readFileAsDataUrl } from "@/services/proofs/file";
@@ -99,7 +100,17 @@ export function useSubmitProof() {
 
         toast.success(`Proof submitted for task #${taskId}`, {
           id: toastId,
-          description: `Hash ${sha256.slice(0, 8)}… stored on-chain`,
+          description: "Proof hash confirmed on-chain.",
+          action: {
+            label: "View transaction",
+            onClick: () => {
+              window.open(
+                getStellarExpertTxUrl(transactionHash),
+                "_blank",
+                "noopener,noreferrer",
+              );
+            },
+          },
         });
 
         setFlowState({

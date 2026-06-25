@@ -23,9 +23,11 @@ import { useWallet } from "@/hooks/use-wallet";
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border-border rounded-lg border px-4 py-3">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="text-foreground text-2xl font-semibold tabular-nums">
+    <div className="surface-card rounded-xl px-4 py-4">
+      <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+        {label}
+      </p>
+      <p className="text-primary mt-1 text-3xl font-semibold tabular-nums">
         {value}
       </p>
     </div>
@@ -52,7 +54,7 @@ export function DashboardView() {
         description="Tasks and activity update automatically via event subscriptions."
       />
 
-      <Card className="border-border ring-0">
+      <Card className="surface-card">
         <CardHeader className="border-border border-b py-4">
           <CardTitle className="text-base">Wallet</CardTitle>
           <CardDescription>Freighter connection</CardDescription>

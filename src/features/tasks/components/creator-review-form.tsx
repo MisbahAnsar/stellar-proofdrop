@@ -65,7 +65,7 @@ export function CreatorReviewForm({
     flowState.status === "pending" ? flowState.action : null;
 
   return (
-    <Card className="border-border ring-0">
+    <Card className="surface-card">
       <CardHeader className="border-border border-b">
         <CardTitle>Review submission</CardTitle>
         <CardDescription>
@@ -102,8 +102,9 @@ export function CreatorReviewForm({
                           : "Proof rejected",
                       description:
                         flowState.action === "approve"
-                          ? `Payment released. Transaction ${flowState.transactionHash} confirmed.`
-                          : `Task reopened for resubmission. Transaction ${flowState.transactionHash} confirmed.`,
+                          ? "Payment was released to the worker on-chain."
+                          : "Task reopened for a new proof submission.",
+                      transactionHash: flowState.transactionHash,
                     }
                   : { status: "error", message: flowState.message }
             }

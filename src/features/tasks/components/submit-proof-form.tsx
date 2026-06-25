@@ -100,7 +100,7 @@ export function SubmitProofForm({
   }
 
   return (
-    <Card className="border-border ring-0">
+    <Card className="surface-card">
       <CardHeader className="border-border border-b">
         <CardTitle>Submit proof</CardTitle>
         <CardDescription>
@@ -153,7 +153,8 @@ export function SubmitProofForm({
                   ? {
                       status: "success",
                       title: "Proof submitted successfully",
-                      description: `Hash ${flowState.proofHash.slice(0, 12)}… confirmed in ${flowState.transactionHash}`,
+                      description: `SHA-256 hash ${flowState.proofHash.slice(0, 12)}… stored on-chain.`,
+                      transactionHash: flowState.transactionHash,
                     }
                   : { status: "error", message: flowState.message }
             }
